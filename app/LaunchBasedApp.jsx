@@ -741,6 +741,63 @@ export default function LaunchBasedApp() {
     const workingAgents = agents.filter(a => a.status === "working");
     const pendingApprovals = agents.filter(a => a.status === "approval");
 
+    // --- LIVE ACTIVITY FEED with streaming simulation ---
+    const activityFeedData = [
+      { agent: "Emma", emoji: "✍️", action: "writing", color: "#8B5CF6", streamText: "Spring is the perfect time to refresh your business strategy. Here are 10 proven ways to attract new customers this season:\n\n1. **Launch a seasonal promotion** — Create a limited-time offer tied to spring themes. Think fresh starts, spring cleaning sales, or \"new beginnings\" bundles.\n\n2. **Refresh your social media** — Update your cover photos, profile pictures, and bio to reflect the season. Post bright, energizing content.\n\n3. **Partner with local businesses** — Cross-promote with complementary businesses in your area. A bakery + florist collab for Mother's Day = magic.\n\n4. **Start a referral program** — Your happiest customers are your best marketers. Give them a reason to spread the word.", label: "Writing blog post: \"10 Ways to Grow Your Business This Spring\"" },
+      { agent: "James", emoji: "🔍", action: "researching", color: "#3B82F6", streamText: "COMPETITOR ANALYSIS — March 14, 2026\n\n▸ Scanning competitor websites... 4 found\n▸ Analyzing pricing pages...\n  → CompetitorA: $49/mo starter, $99/mo pro, $249/mo business\n  → CompetitorB: $29/mo flat rate, no tiers\n  → CompetitorC: $79/mo + $0.02/action usage fee\n  → CompetitorD: Free tier available, $39/mo premium\n▸ Checking social media engagement...\n  → CompetitorA: 2.3K followers, 4.2% engagement rate\n  → CompetitorB: 890 followers, 1.8% engagement rate\n▸ Monitoring review sites...\n  → CompetitorA: 4.2★ on G2 (127 reviews)\n  → CompetitorC: 3.8★ on Capterra (43 reviews)\n▸ Key insight: CompetitorA launched a 20% spring discount 2 days ago\n▸ Recommendation: Consider matching or differentiating with a value-add bundle", label: "Analyzing competitor pricing and market positioning" },
+      { agent: "Olivia", emoji: "📧", action: "outreach", color: "#22C55E", streamText: "OUTREACH CAMPAIGN — Warm Lead Follow-ups\n\n▸ Loading lead list... 12 warm leads found\n▸ Personalizing email #1 of 12...\n  To: sarah.chen@freshfoods.co\n  Subject: Quick follow-up on your demo request\n  Body: Hi Sarah, I noticed you checked out our meal prep automation tools last week. I'd love to show you how other food businesses are saving 15 hours/week...\n▸ Personalizing email #2 of 12...\n  To: mike.torres@urbanfit.com\n  Subject: The fitness studio growth hack you asked about\n  Body: Hey Mike, Great chatting at the conference last week. You mentioned wanting to automate your class scheduling...\n▸ Checking send limits... 47/100 daily limit remaining ✓\n▸ Running spam score check... Score: 2.1 (excellent)\n▸ Scheduling sends for optimal delivery times...\n  → 3 emails queued for 9:15 AM EST\n  → 4 emails queued for 1:30 PM EST\n  → 5 emails queued for 4:00 PM EST", label: "Personalizing follow-up emails for 12 warm leads" },
+      { agent: "Sophia", emoji: "💬", action: "responding", color: "#F59E0B", streamText: "CUSTOMER SUPPORT — Active Tickets\n\n▸ Ticket #1847 — Priority: Medium\n  From: jenny.williams@email.com\n  Question: \"How do I change my subscription plan?\"\n  → Drafting response...\n  \"Hi Jenny! Great question. Here's how to change your plan:\n   1. Go to Settings (gear icon, top right)\n   2. Click 'Subscription'\n   3. Choose your new plan\n   4. Click 'Update'\n   Your new plan starts immediately and we'll prorate the difference. Let me know if you need any help!\"\n  → Response sent ✓ (avg response time: 47 seconds)\n\n▸ Ticket #1848 — Priority: High\n  From: robert.kim@techstart.io\n  Question: \"My checkout page isn't loading for customers\"\n  → Escalating to technical review...\n  → Checking Shopify API status... all systems operational\n  → Checking SSL certificate... valid through 2027-01-15\n  → Running page speed test... loading in 2.3s (acceptable)", label: "Responding to 3 customer support tickets" },
+      { agent: "Ethan", emoji: "📊", action: "analyzing", color: "#EC4899", streamText: "WEEKLY PERFORMANCE REPORT — Generating...\n\n▸ Pulling revenue data...\n  This week:  $3,821 (+12.4% vs last week)\n  Last week:  $3,399\n  Monthly:    $14,207 (73% of $19,500 goal)\n\n▸ Pulling traffic data...\n  Website visits: 1,847 (+23% vs last week)\n  Unique visitors: 1,204\n  Bounce rate: 34% (improved from 41%)\n  Top pages: /products (34%), /about (21%), /blog (18%)\n\n▸ Pulling conversion data...\n  Email signups: 47 new subscribers\n  Contact form: 12 submissions\n  Purchases: 31 orders (1.67% conversion rate)\n\n▸ Pulling social media data...\n  Instagram: +89 followers, 4.7% engagement\n  Facebook: +34 followers, 2.1% engagement\n  Best post: Spring sale carousel (2,341 impressions)\n\n▸ AI Insights:\n  → Traffic spike correlates with Tuesday blog post\n  → Email open rate improved after subject line A/B test\n  → Recommend increasing ad spend on Instagram (best ROI)", label: "Generating weekly performance analytics report" },
+      { agent: "Liam", emoji: "📈", action: "optimizing", color: "#06B6D4", streamText: "SEO OPTIMIZATION — Site Audit Running...\n\n▸ Crawling 47 pages...\n  → 42 pages indexed ✓\n  → 5 pages missing meta descriptions ⚠️\n  → 0 broken links ✓\n\n▸ Keyword rankings update:\n  → \"custom cakes near me\" — Position #4 (↑2)\n  → \"wedding cake delivery\" — Position #7 (↑5)\n  → \"birthday cake order online\" — Position #12 (→)\n  → \"bakery catering services\" — Position #18 (↑3)\n\n▸ Content gap analysis:\n  → Competitors ranking for \"gluten free cake\" — you have no content\n  → Competitors ranking for \"cake decorating ideas\" — you have 1 thin page\n  → Recommendation: Create 2 new blog posts targeting these keywords\n\n▸ Technical SEO:\n  → Page speed: 2.1s mobile, 1.3s desktop ✓\n  → Core Web Vitals: All passing ✓\n  → Schema markup: Added to 3 product pages\n  → Sitemap: Updated and submitted to Google", label: "Running full SEO audit and keyword tracking" },
+      { agent: "Ava", emoji: "📱", action: "creating", color: "#F97316", streamText: "SOCIAL MEDIA — Creating this week's content...\n\n▸ Analyzing top-performing posts from last 30 days...\n  → Carousels: avg 342 impressions, 4.8% engagement\n  → Reels: avg 1,247 impressions, 6.2% engagement\n  → Single images: avg 198 impressions, 2.1% engagement\n  → Strategy: Prioritize reels and carousels this week\n\n▸ Creating Post #1 (Instagram Carousel):\n  → Topic: \"5 Things Every New Business Owner Needs to Know\"\n  → Slide 1: Bold hook text on brand-colored background\n  → Slide 2: Tip #1 — Start with one product, not ten\n  → Slide 3: Tip #2 — Your first 100 customers matter most\n  → Slide 4: Tip #3 — Consistency beats perfection\n  → Slide 5: CTA — \"Save this for later! Follow for more tips\"\n  → Hashtags: #smallbusiness #entrepreneur #biztips #startup2026\n  → Scheduled: Tuesday 11:30 AM EST (peak engagement time)\n\n▸ Creating Post #2 (Instagram Reel):\n  → Concept: Behind-the-scenes of a customer order being prepared\n  → Duration: 15 seconds\n  → Audio: Trending sound #spring2026\n  → Scheduled: Thursday 6:00 PM EST", label: "Planning and creating social media content for the week" },
+    ];
+
+    const [feedItems, setFeedItems] = useState([]);
+    const [streamingIdx, setStreamingIdx] = useState(0);
+    const [streamedChars, setStreamedChars] = useState(0);
+    const [feedPaused, setFeedPaused] = useState(false);
+    const feedRef = useCallback(node => {
+      if (node) node.scrollTop = node.scrollHeight;
+    }, [feedItems, streamedChars]);
+
+    // Simulate streaming character by character
+    useEffect(() => {
+      if (feedPaused) return;
+      const currentItem = activityFeedData[streamingIdx % activityFeedData.length];
+      const fullText = currentItem.streamText;
+
+      if (streamedChars < fullText.length) {
+        // Stream characters — variable speed for realism
+        const ch = fullText[streamedChars];
+        const isNewline = ch === '\n';
+        const isPunctuation = '.!?:'.includes(ch);
+        const delay = isNewline ? 120 : isPunctuation ? 80 : (15 + Math.random() * 25);
+
+        const timer = setTimeout(() => {
+          setStreamedChars(prev => prev + 1);
+        }, delay);
+        return () => clearTimeout(timer);
+      } else {
+        // Current item done streaming — pause, then start next
+        const timer = setTimeout(() => {
+          setFeedItems(prev => {
+            const newItems = [...prev, {
+              ...currentItem,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              id: Date.now(),
+            }];
+            return newItems.slice(-20); // Keep last 20 completed items
+          });
+          setStreamingIdx(prev => prev + 1);
+          setStreamedChars(0);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }, [streamedChars, streamingIdx, feedPaused]);
+
+    const currentStreamItem = activityFeedData[streamingIdx % activityFeedData.length];
+    const currentStreamText = currentStreamItem.streamText.substring(0, streamedChars);
+
     return (
       <div>
         <div style={{ marginBottom: 28 }}>
@@ -769,6 +826,147 @@ export default function LaunchBasedApp() {
             </Card>
           ))}
         </div>
+
+        {/* ========== LIVE ACTIVITY FEED ========== */}
+        <Card t={t} hover={false} style={{ padding: 0, marginBottom: 24, overflow: "hidden", border: `1px solid ${t.primary}33` }}>
+          {/* Feed header */}
+          <div style={{
+            padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center",
+            background: `linear-gradient(135deg, ${t.primary}15, ${t.accent}10)`,
+            borderBottom: `1px solid ${t.border}`,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 10, height: 10, borderRadius: 5, background: feedPaused ? t.warning : "#22C55E",
+                boxShadow: feedPaused ? "none" : "0 0 8px #22C55E88, 0 0 16px #22C55E44",
+                animation: feedPaused ? "none" : "pulse-glow 2s ease-in-out infinite",
+              }} />
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: t.text, margin: 0 }}>Live Agent Activity</h3>
+              <span style={{ fontSize: 12, color: t.textMuted, fontFamily: "monospace" }}>
+                {feedPaused ? "PAUSED" : "STREAMING"}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Btn variant={feedPaused ? "primary" : "ghost"} size="sm" t={t} onClick={() => setFeedPaused(!feedPaused)}>
+                {feedPaused ? "▶ Resume" : "⏸ Pause"}
+              </Btn>
+            </div>
+          </div>
+
+          {/* Streaming content area */}
+          <div ref={feedRef} style={{
+            height: 380, overflowY: "auto", padding: "0 4px",
+            background: `linear-gradient(180deg, ${t.bg} 0%, ${t.bgCard} 100%)`,
+          }}>
+            {/* Completed feed items (collapsed) */}
+            {feedItems.map((item) => (
+              <div key={item.id} style={{
+                padding: "10px 16px", borderBottom: `1px solid ${t.border}`,
+                opacity: 0.6, transition: "opacity 0.3s",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>{item.emoji}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: item.color }}>{item.agent}</span>
+                  <span style={{ fontSize: 12, color: t.textMuted }}>completed</span>
+                  <span style={{ fontSize: 12, color: t.textSec, flex: 1 }}>{item.label}</span>
+                  <span style={{ fontSize: 11, color: t.textMuted, fontFamily: "monospace" }}>{item.timestamp}</span>
+                  <span style={{ color: t.success, fontSize: 12 }}>✓</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Currently streaming item */}
+            <div style={{
+              padding: "16px 16px 20px", background: `${currentStreamItem.color}08`,
+              borderLeft: `3px solid ${currentStreamItem.color}`,
+              minHeight: 200,
+            }}>
+              {/* Agent header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 20, background: `${currentStreamItem.color}20`, border: `1px solid ${currentStreamItem.color}44`,
+                }}>{currentStreamItem.emoji}</div>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: currentStreamItem.color }}>{currentStreamItem.agent}</span>
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                      padding: "2px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                      background: `${currentStreamItem.color}20`, color: currentStreamItem.color,
+                    }}>
+                      <span style={{
+                        width: 6, height: 6, borderRadius: 3, background: currentStreamItem.color,
+                        animation: "pulse-glow 1s ease-in-out infinite",
+                      }} />
+                      {currentStreamItem.action}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: t.textSec }}>{currentStreamItem.label}</div>
+                </div>
+              </div>
+
+              {/* Streaming text output */}
+              <div style={{
+                fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+                fontSize: 12, lineHeight: 1.7, color: t.text,
+                padding: "12px 16px", borderRadius: 8,
+                background: t.bg, border: `1px solid ${t.border}`,
+                whiteSpace: "pre-wrap", wordBreak: "break-word",
+                minHeight: 120, position: "relative",
+              }}>
+                {currentStreamText}
+                {/* Blinking cursor */}
+                {!feedPaused && streamedChars < currentStreamItem.streamText.length && (
+                  <span style={{
+                    display: "inline-block", width: 7, height: 16,
+                    background: currentStreamItem.color, marginLeft: 1,
+                    animation: "blink-cursor 0.8s step-end infinite",
+                    verticalAlign: "text-bottom",
+                  }} />
+                )}
+              </div>
+
+              {/* Progress for current stream */}
+              <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                <ProgressBar value={(streamedChars / currentStreamItem.streamText.length) * 100} t={t} height={3} color={currentStreamItem.color} />
+                <span style={{ fontSize: 11, color: t.textMuted, fontFamily: "monospace", whiteSpace: "nowrap" }}>
+                  {Math.round((streamedChars / currentStreamItem.streamText.length) * 100)}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Feed footer */}
+          <div style={{
+            padding: "8px 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+            borderTop: `1px solid ${t.border}`, background: t.bgCard,
+          }}>
+            <span style={{ fontSize: 11, color: t.textMuted }}>
+              {feedItems.length} actions completed this session
+            </span>
+            <div style={{ display: "flex", gap: 12 }}>
+              {agents.filter(a => a.status === "working").map(a => (
+                <span key={a.name} title={`${a.name} — ${a.role}`} style={{
+                  fontSize: 16, opacity: currentStreamItem.agent === a.name ? 1 : 0.4,
+                  transition: "opacity 0.3s",
+                }}>{a.emoji}</span>
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        {/* Animations */}
+        <style>{`
+          @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+          }
+          @keyframes blink-cursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
+        `}</style>
 
         {/* Active work */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20, marginBottom: 24 }}>
