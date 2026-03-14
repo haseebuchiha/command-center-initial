@@ -2144,10 +2144,10 @@ export default function LaunchBasedApp() {
       </div>
 
       {/* Floating AI Chat Assistant */}
-      {HelpChat({ t, isMobile, page, form, connectedTools, onboardProgress })}
+      <HelpChat t={t} isMobile={isMobile} page={page} form={form} connectedTools={connectedTools} onboardProgress={onboardProgress} />
 
       {/* Guided Tour */}
-      {showTour && tourSteps[showTour] && GuidedTour({ t, steps: tourSteps[showTour], onClose: () => setShowTour(null) })}
+      {showTour && tourSteps[showTour] && <GuidedTour t={t} steps={tourSteps[showTour]} onClose={() => setShowTour(null)} />}
     </div>
   );
 }
