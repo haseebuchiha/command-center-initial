@@ -75,6 +75,26 @@ const pieData = [
   { name: "Support", value: 8, color: "#EF4444" },
 ];
 
+// --- TOKEN USAGE DATA (mock) ---
+const tokenUsage = {
+  plan: "Growth", monthlyLimit: 500000, used: 312480, resetDate: "Apr 1",
+  byAgent: [
+    { name: "Emma", emoji: "✍️", tokens: 87200, color: "#3B82F6" },
+    { name: "James", emoji: "🔍", tokens: 62100, color: "#8B5CF6" },
+    { name: "Olivia", emoji: "📧", tokens: 48300, color: "#22C55E" },
+    { name: "Sophia", emoji: "💬", tokens: 41500, color: "#F59E0B" },
+    { name: "Ethan", emoji: "📊", tokens: 35800, color: "#EF4444" },
+    { name: "Ava", emoji: "📱", tokens: 22400, color: "#EC4899" },
+    { name: "Liam", emoji: "📈", tokens: 9680, color: "#06B6D4" },
+    { name: "Noah", emoji: "📋", tokens: 5500, color: "#84CC16" },
+  ],
+  daily: [
+    { day: "Mon", tokens: 52100 }, { day: "Tue", tokens: 61200 }, { day: "Wed", tokens: 48700 },
+    { day: "Thu", tokens: 55300 }, { day: "Fri", tokens: 43800 }, { day: "Sat", tokens: 31200 },
+    { day: "Sun", tokens: 20180 },
+  ],
+};
+
 // --- TOOLTIP COMPONENT ---
 const TT = ({ text, children, t }) => {
   const [show, setShow] = useState(false);
@@ -1179,6 +1199,133 @@ export default function LaunchBasedApp() {
             </Card>
           ))}
         </div>
+
+        {/* ========== TOKEN USAGE TRACKER ========== */}
+        <Card t={t} hover={false} style={{ padding: 0, marginBottom: 24, overflow: "hidden", border: `1px solid ${t.border}` }}>
+          {/* Token header */}
+          <div style={{
+            padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center",
+            borderBottom: `1px solid ${t.border}`,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 20 }}>🪙</span>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: t.text, margin: 0 }}>Token Usage</h3>
+              <TT text="Tokens are like fuel for your AI team. Every task they do uses tokens. This shows how many you've used this month and how many you have left." t={t} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Badge text={`${tokenUsage.plan} Plan`} color={t.primary} t={t} />
+              <span style={{ fontSize: 12, color: t.textMuted }}>Resets {tokenUsage.resetDate}</span>
+            </div>
+          </div>
+
+          <div style={{ padding: isMobile ? 16 : 20 }}>
+            {/* Main usage bar */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
+                <div>
+                  <span style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800, color: t.text }}>{(tokenUsage.used / 1000).toFixed(0)}K</span>
+                  <span style={{ fontSize: 14, color: t.textMuted, marginLeft: 4 }}>/ {(tokenUsage.monthlyLimit / 1000).toFixed(0)}K tokens</span>
+                </div>
+                <span style={{
+                  fontSize: 14, fontWeight: 700,
+                  color: (tokenUsage.used / tokenUsage.monthlyLimit) > 0.85 ? t.danger : (tokenUsage.used / tokenUsage.monthlyLimit) > 0.65 ? t.warning : t.success,
+                }}>{Math.round((tokenUsage.used / tokenUsage.monthlyLimit) * 100)}% used</span>
+              </div>
+              {/* Usage progress bar */}
+              <div style={{ height: 12, borderRadius: 6, background: `${t.textMuted}20`, overflow: "hidden", position: "relative" }}>
+                <div style={{
+                  height: "100%", borderRadius: 6, transition: "width 0.5s ease",
+                  width: `${(tokenUsage.used / tokenUsage.monthlyLimit) * 100}%`,
+                  background: (tokenUsage.used / tokenUsage.monthlyLimit) > 0.85
+                    ? `linear-gradient(90deg, ${t.danger}, ${t.danger}CC)`
+                    : (tokenUsage.used / tokenUsage.monthlyLimit) > 0.65
+                    ? `linear-gradient(90deg, ${t.warning}, ${t.warning}CC)`
+                    : `linear-gradient(90deg, ${t.primary}, ${t.accent})`,
+                }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                <span style={{ fontSize: 12, color: t.textMuted }}>{((tokenUsage.monthlyLimit - tokenUsage.used) / 1000).toFixed(0)}K tokens left this month</span>
+                <span style={{ fontSize: 12, color: t.textMuted }}>~{Math.round((tokenUsage.monthlyLimit - tokenUsage.used) / (tokenUsage.used / 14))} days at this pace</span>
+              </div>
+            </div>
+
+            {/* Two columns: agent breakdown + daily chart */}
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
+              {/* Per-agent breakdown */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: t.textSec, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  Usage by Agent
+                  <TT text="See which agents use the most tokens. Agents that write long content (like Emma) use more than agents that do quick tasks (like Noah)." t={t} />
+                </div>
+                {tokenUsage.byAgent.map(a => (
+                  <div key={a.name} style={{ marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 14 }}>{a.emoji}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: t.text }}>{a.name}</span>
+                      </div>
+                      <span style={{ fontSize: 11, color: t.textMuted, fontFamily: "monospace" }}>{(a.tokens / 1000).toFixed(1)}K</span>
+                    </div>
+                    <div style={{ height: 4, borderRadius: 2, background: `${t.textMuted}15` }}>
+                      <div style={{
+                        height: "100%", borderRadius: 2, background: a.color,
+                        width: `${(a.tokens / tokenUsage.byAgent[0].tokens) * 100}%`,
+                        transition: "width 0.3s ease",
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Daily usage mini chart */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: t.textSec, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                  Daily Usage This Week
+                  <TT text="This shows how many tokens your team used each day. Lower bars on weekends is normal — your team works less when you're not around!" t={t} />
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: isMobile ? 4 : 8, height: 120, padding: "0 4px" }}>
+                  {tokenUsage.daily.map((d, i) => {
+                    const maxTokens = Math.max(...tokenUsage.daily.map(x => x.tokens));
+                    const barHeight = (d.tokens / maxTokens) * 100;
+                    const isToday = i === new Date().getDay() - 1;
+                    return (
+                      <div key={d.day} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color: t.textMuted, fontFamily: "monospace" }}>{(d.tokens / 1000).toFixed(0)}K</span>
+                        <div style={{
+                          width: "100%", borderRadius: 4,
+                          height: `${barHeight}%`, minHeight: 8,
+                          background: isToday
+                            ? `linear-gradient(180deg, ${t.primary}, ${t.accent})`
+                            : `${t.primary}30`,
+                          border: isToday ? `1px solid ${t.primary}` : "none",
+                          transition: "height 0.3s ease",
+                        }} />
+                        <span style={{
+                          fontSize: 11, fontWeight: isToday ? 700 : 400,
+                          color: isToday ? t.primary : t.textMuted,
+                        }}>{d.day}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick tip */}
+            <div style={{
+              marginTop: 16, padding: "10px 14px", borderRadius: 8,
+              background: `${t.primary}08`, border: `1px solid ${t.primary}20`,
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <span style={{ fontSize: 16 }}>💡</span>
+              <span style={{ fontSize: 12, color: t.textSec, lineHeight: 1.5 }}>
+                {(tokenUsage.used / tokenUsage.monthlyLimit) > 0.8
+                  ? "You're using a lot of tokens this month! Consider upgrading your plan or pausing non-urgent tasks."
+                  : "You're on track this month. Your AI team has plenty of fuel to keep working!"}
+              </span>
+            </div>
+          </div>
+        </Card>
 
         {/* ========== LIVE ACTIVITY FEED ========== */}
         <Card t={t} hover={false} style={{ padding: 0, marginBottom: 24, overflow: "hidden", border: `1px solid ${t.primary}33` }}>
