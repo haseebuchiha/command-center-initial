@@ -208,6 +208,297 @@ const Badge = ({ text, color, t }) => (
   }}>{text}</span>
 );
 
+// --- HELP CHAT BUBBLE (Floating AI Assistant) ---
+const HelpChat = ({ t, isMobile, page, form, connectedTools, onboardProgress }) => {
+  const [open, setOpen] = useState(false);
+  const [msgs, setMsgs] = useState([
+    { from: "bot", text: "Hey there! I'm your LaunchBased helper. Ask me anything about your dashboard, your AI team, or how to get started. No question is too simple!" }
+  ]);
+  const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
+
+  const quickReplies = {
+    landing: ["What is LaunchBased?", "How does it work?", "Is this safe?"],
+    orderForm: ["What info do you need?", "Can I change this later?", "What happens after I submit?"],
+    onboarding: ["What should I do first?", "Can I skip steps?", "How long does setup take?"],
+    dashboard: ["What are my agents doing?", "How do I approve work?", "What does this chart mean?"],
+    agents: ["How do I assign a task?", "What does each agent do?", "Why is an agent idle?"],
+    approvals: ["What happens if I block something?", "Can I edit before approving?", "How fast do agents work?"],
+    integrations: ["Which tool should I connect first?", "Is my data safe?", "What if I don't have Shopify?"],
+    website: ["How do I connect my domain?", "Can I edit my website?", "How long until it's live?"],
+    analytics: ["What do these numbers mean?", "How do I get more leads?", "Is my business growing?"],
+    daily: ["How is this report made?", "Can I change the time?", "What should I focus on?"],
+    docs: ["Where do these come from?", "Can I edit documents?", "How do I download them?"],
+    settings: ["How do I change my logo?", "What are notifications for?", "How do I disconnect a tool?"],
+  };
+
+  const botResponses = {
+    "What is LaunchBased?": "LaunchBased gives you a team of 8 AI helpers that run your business tasks for you — like writing blog posts, finding leads, posting on social media, and more. You don't need any tech skills!",
+    "How does it work?": "You fill out a quick form about your business, and we set up your AI team. They start working right away! You just check in, approve their work, and watch your business grow.",
+    "Is this safe?": "Your data is kept in a secure vault, separate from everything else. Your AI team never sees your personal info directly — they use special tokens instead. It's like a safety lock on your data!",
+    "What info do you need?": "Just the basics: your name, business name, what you do, and your goals. Everything else is optional. You can always change it later in Settings!",
+    "Can I change this later?": "Yes! Everything you enter here can be updated later in your Settings page. Don't worry about getting it perfect right now.",
+    "What happens after I submit?": "We'll build your website automatically (takes about 2 minutes), then walk you through a simple setup checklist. Your AI team starts working as soon as setup is done!",
+    "What should I do first?": "Start at the top of the checklist and work your way down. The most important step is connecting a chat app (like Discord) so your team can reach you. You can skip optional steps!",
+    "Can I skip steps?": "Yes! Steps marked with a 'Skip' button are optional. The required ones are connecting a chat app and joining the community. Everything else can wait.",
+    "How long does setup take?": "Most people finish in about 5 minutes. The first two steps (email and website) happen automatically, so you're already ahead!",
+    "What are my agents doing?": "The live feed at the top shows exactly what your agents are working on in real time. The cards below show who's working, who needs your review, and who's available for a new task.",
+    "How do I approve work?": "When an agent finishes something (like an email or blog post), it shows up in your Approvals page. Just tap Approve to send it live, Revise to ask for changes, or Block to stop it.",
+    "What does this chart mean?": "The bar chart shows your weekly activity: blue bars are new leads, purple bars are content pieces created, and green bars are sales. Higher bars = more activity!",
+    "How do I assign a task?": "Tap the 'Assign a Task' button on any idle agent. You can type what you need in plain English, like 'Write a blog post about summer recipes' and they'll get right on it!",
+    "What does each agent do?": "Each agent has a specialty: Emma writes content, James does research, Olivia handles sales emails, Liam does SEO, Sophia helps customers, Noah manages operations, Ava runs social media, and Ethan analyzes your data.",
+    "Why is an agent idle?": "Idle means that agent is available and waiting for work. You can assign them a task, or they'll pick up work automatically based on your business needs.",
+    "What happens if I block something?": "Blocking tells the agent that this work shouldn't go out. They'll learn from your feedback and try a different approach next time. Nothing gets published without your OK!",
+    "Can I edit before approving?": "Yes! Tap the 'Revise' button and tell the agent what to change. They'll update it and send it back for your review. You're always in control.",
+    "How fast do agents work?": "Most tasks take a few minutes to a few hours depending on complexity. A blog post might take 15 minutes, while a full competitor analysis could take an hour.",
+    "Which tool should I connect first?": "Start with the tools you already use! If you sell online, connect Shopify. If you email customers, connect Gmail. If you're on social media, connect Instagram. Start with one and add more later.",
+    "Is my data safe?": "Absolutely! Your personal data is stored in a separate encrypted vault. Your AI agents never see your raw personal info — they use secure tokens instead.",
+    "What if I don't have Shopify?": "No worries! You don't need any specific tool. Connect whatever you already use, or skip this entirely. Your AI team works great on its own too.",
+    "How do I connect my domain?": "Type your domain name in the box, then add the CNAME record we show you in your domain provider (like GoDaddy). We have 60-second video guides for each provider!",
+    "Can I edit my website?": "Yes! Click 'Open Editor' to make changes yourself, or just ask Emma (your content writer) to update it for you. She can change text, add pages, and more.",
+    "How long until it's live?": "Your website is already live from the moment you complete the order form! The default URL works instantly. Custom domains take 5-30 minutes after adding the DNS record.",
+    "What do these numbers mean?": "Leads = people interested in your business. Content = blog posts, social posts, and emails your team created. Sales = actual purchases or sign-ups. More = better!",
+    "How do I get more leads?": "Great question! Try connecting your social media accounts so Ava can post regularly. Ask Liam to improve your SEO. And have Olivia send personalized outreach to potential customers.",
+    "Is my business growing?": "Check your weekly chart — if the bars are getting taller over time, you're growing! The daily brief also gives you a morning summary of your progress.",
+    "How is this report made?": "Ethan (your data analyst) pulls together all your numbers every morning at 7 AM. He looks at leads, sales, content performance, and competitor activity to give you the full picture.",
+    "Can I change the time?": "Yes! Go to Settings and look under Notifications. You can change when the daily brief arrives or turn it off completely.",
+    "What should I focus on?": "Check the 'Needs Your Attention' section — those are the most urgent items. After that, review and approve any pending work from your agents so they can keep moving!",
+    "Where do these come from?": "Your AI team creates all of these! Emma writes blog posts, Olivia drafts emails, Ava makes social content, James creates research reports, and Ethan does analytics.",
+    "Can I edit documents?": "Yes! Click 'View' on any document to read it. From there you can edit, download, or share it. You can also ask the agent who made it to revise it.",
+    "How do I download them?": "Click 'View' on any document, then look for the download button. You can save them as PDF, Word, or plain text.",
+    "How do I change my logo?": "Click the upload area under 'Brand Settings' and pick your logo file from your phone or computer. It accepts PNG, JPG, SVG, or WebP images.",
+    "What are notifications for?": "Notifications let you know when agents need your approval, when your daily brief is ready, and when big things happen with your business. You control which ones you get!",
+    "How do I disconnect a tool?": "Go to Settings, scroll to 'Connected Tools', and click 'Remove' next to the tool you want to disconnect. Your data stays safe even after disconnecting.",
+  };
+
+  const sendMsg = () => {
+    if (!input.trim()) return;
+    const userMsg = input.trim();
+    setMsgs(prev => [...prev, { from: "user", text: userMsg }]);
+    setInput("");
+    setTyping(true);
+    setTimeout(() => {
+      const response = botResponses[userMsg] || `Great question! In the full version, I'll connect to your AI team to get you a personalized answer. For now, try tapping one of the suggested questions below, or explore your ${page === "dashboard" ? "Command Center" : page} page — I'm always here if you get stuck!`;
+      setMsgs(prev => [...prev, { from: "bot", text: response }]);
+      setTyping(false);
+    }, 800 + Math.random() * 600);
+  };
+
+  const currentQuickReplies = quickReplies[page] || quickReplies.dashboard;
+
+  if (!open) {
+    return (
+      <div onClick={() => setOpen(true)} style={{
+        position: "fixed", bottom: isMobile ? 74 : 24, right: 20, width: 56, height: 56, borderRadius: 28,
+        background: `linear-gradient(135deg, ${t.primary}, ${t.accent})`, display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", boxShadow: `0 4px 20px ${t.primary}44`, zIndex: 997, transition: "transform 0.2s",
+      }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <div style={{
+          position: "absolute", top: -2, right: -2, width: 16, height: 16, borderRadius: 8,
+          background: t.success, border: `2px solid ${t.bg}`, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 9, color: "#FFF", fontWeight: 700,
+        }}>?</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      position: "fixed", bottom: isMobile ? 64 : 20, right: isMobile ? 0 : 20, width: isMobile ? "100%" : 380, height: isMobile ? "80vh" : 520,
+      background: t.bgCard, borderRadius: isMobile ? "16px 16px 0 0" : 16, border: `1px solid ${t.border}`,
+      boxShadow: `0 8px 40px rgba(0,0,0,0.3)`, zIndex: 997, display: "flex", flexDirection: "column", overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "14px 16px", background: `linear-gradient(135deg, ${t.primary}, ${t.accent})`,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 16, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#FFF" }}>LaunchBased Helper</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>Ask me anything — no question is too simple!</div>
+          </div>
+        </div>
+        <div onClick={() => setOpen(false)} style={{ cursor: "pointer", color: "#FFF", opacity: 0.8, display: "flex" }}>
+          <Icons.X />
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, WebkitOverflowScrolling: "touch" }}>
+        {msgs.map((m, i) => (
+          <div key={i} style={{
+            maxWidth: "85%", padding: "10px 14px", borderRadius: 14,
+            alignSelf: m.from === "user" ? "flex-end" : "flex-start",
+            background: m.from === "user" ? t.primary : t.bgElevated,
+            color: m.from === "user" ? "#FFF" : t.text,
+            fontSize: 14, lineHeight: 1.5,
+            borderBottomRightRadius: m.from === "user" ? 4 : 14,
+            borderBottomLeftRadius: m.from === "bot" ? 4 : 14,
+          }}>{m.text}</div>
+        ))}
+        {typing && (
+          <div style={{ alignSelf: "flex-start", padding: "10px 14px", borderRadius: 14, background: t.bgElevated, color: t.textMuted, fontSize: 14, borderBottomLeftRadius: 4 }}>
+            Typing...
+          </div>
+        )}
+      </div>
+
+      {/* Quick replies */}
+      <div style={{ padding: "8px 16px 4px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {currentQuickReplies.map((q, i) => (
+          <div key={i} onClick={() => { setInput(q); setTimeout(() => { setMsgs(prev => [...prev, { from: "user", text: q }]); setInput(""); setTyping(true); setTimeout(() => { const response = botResponses[q] || "Let me look into that for you!"; setMsgs(prev => [...prev, { from: "bot", text: response }]); setTyping(false); }, 800 + Math.random() * 600); }, 100); }}
+            style={{
+              padding: "5px 10px", borderRadius: 16, fontSize: 12, cursor: "pointer",
+              background: `${t.primary}15`, color: t.primary, border: `1px solid ${t.primary}33`, whiteSpace: "nowrap",
+            }}>{q}</div>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div style={{ padding: "8px 12px 12px", display: "flex", gap: 8, borderTop: `1px solid ${t.border}` }}>
+        <input value={input} onChange={e => setInput(e.target.value)} placeholder="Type your question..."
+          onKeyDown={e => e.key === "Enter" && sendMsg()}
+          style={{
+            flex: 1, padding: "10px 14px", borderRadius: 20, fontSize: 14, border: `1px solid ${t.border}`,
+            background: t.bg, color: t.text, outline: "none",
+          }} />
+        <div onClick={sendMsg} style={{
+          width: 40, height: 40, borderRadius: 20, background: t.primary, display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", flexShrink: 0,
+        }}><Icons.Send /></div>
+      </div>
+    </div>
+  );
+};
+
+// --- GUIDED TOUR / SPOTLIGHT ---
+const GuidedTour = ({ t, steps, onClose }) => {
+  const [step, setStep] = useState(0);
+  if (!steps || steps.length === 0) return null;
+  const current = steps[step];
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9998 }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)" }} />
+      <div style={{
+        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+        background: t.bgCard, borderRadius: 16, padding: 28, maxWidth: 420, width: "90%",
+        border: `2px solid ${t.primary}`, boxShadow: `0 8px 40px ${t.primary}33`,
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, color: t.primary, fontWeight: 700 }}>Step {step + 1} of {steps.length}</div>
+          <div onClick={onClose} style={{ cursor: "pointer", color: t.textMuted }}><Icons.X /></div>
+        </div>
+        <div style={{ fontSize: 32, marginBottom: 12 }}>{current.emoji}</div>
+        <h3 style={{ fontSize: 20, fontWeight: 800, color: t.text, margin: "0 0 8px" }}>{current.title}</h3>
+        <p style={{ fontSize: 15, color: t.textSec, lineHeight: 1.6, margin: "0 0 20px" }}>{current.body}</p>
+        <ProgressBar value={((step + 1) / steps.length) * 100} t={t} height={4} />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+          <Btn variant="ghost" size="sm" t={t} onClick={() => step > 0 ? setStep(step - 1) : onClose()}>
+            {step > 0 ? "Back" : "Skip Tour"}
+          </Btn>
+          <Btn size="sm" t={t} onClick={() => step < steps.length - 1 ? setStep(step + 1) : onClose()}>
+            {step < steps.length - 1 ? "Next" : "Got it!"}
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- CONTEXTUAL NUDGE BANNER ---
+const NudgeBanner = ({ t, text, actionLabel, onAction, onDismiss, emoji }) => (
+  <div style={{
+    padding: "12px 16px", borderRadius: 12, marginBottom: 16,
+    background: `linear-gradient(135deg, ${t.primary}15, ${t.accent}10)`,
+    border: `1px solid ${t.primary}33`, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+  }}>
+    <span style={{ fontSize: 22 }}>{emoji || "💡"}</span>
+    <div style={{ flex: 1, minWidth: 200 }}>
+      <div style={{ fontSize: 14, color: t.text, lineHeight: 1.5 }}>{text}</div>
+    </div>
+    <div style={{ display: "flex", gap: 8 }}>
+      {actionLabel && <Btn size="sm" t={t} onClick={onAction}>{actionLabel}</Btn>}
+      {onDismiss && <Btn variant="ghost" size="sm" t={t} onClick={onDismiss}>Dismiss</Btn>}
+    </div>
+  </div>
+);
+
+// --- VIDEO MICRO-TUTORIAL PLACEHOLDER ---
+const VideoTip = ({ t, title, duration, onPlay }) => (
+  <div onClick={onPlay} style={{
+    display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 12px", borderRadius: 8,
+    background: `${t.accent}15`, border: `1px solid ${t.accent}33`, cursor: "pointer", transition: "all 0.2s",
+  }}>
+    <div style={{
+      width: 24, height: 24, borderRadius: 12, background: t.accent, display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <svg width="10" height="10" viewBox="0 0 12 14" fill="#FFF"><polygon points="0,0 12,7 0,14"/></svg>
+    </div>
+    <span style={{ fontSize: 12, color: t.accent, fontWeight: 600 }}>{title}</span>
+    <span style={{ fontSize: 11, color: t.textMuted }}>{duration}</span>
+  </div>
+);
+
+// --- WHAT SHOULD I DO NEXT (Smart Suggestion) ---
+const NextActionCard = ({ t, form, connectedTools, onboardProgress, page, setPage }) => {
+  let suggestion = null;
+  if (onboardProgress < 100) {
+    suggestion = { emoji: "📋", text: "You haven't finished setting up yet! Complete your checklist to unlock your full AI team.", action: "Finish Setup", target: "onboarding" };
+  } else if (connectedTools.length < 3) {
+    suggestion = { emoji: "🔌", text: "Your AI team works better with more tools connected. Try adding Instagram or Shopify!", action: "Connect Tools", target: "integrations" };
+  } else {
+    suggestion = { emoji: "⏳", text: "You have 2 items waiting for your review. Approve them so your agents can keep working!", action: "Review Now", target: "approvals" };
+  }
+  if (!suggestion) return null;
+  return (
+    <div style={{
+      padding: "16px 20px", borderRadius: 12, marginBottom: 20,
+      background: `linear-gradient(135deg, ${t.accent}12, ${t.primary}08)`,
+      border: `1px solid ${t.accent}33`,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill={t.accent} stroke={t.accent} strokeWidth="1"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span style={{ fontSize: 14, fontWeight: 700, color: t.accent }}>What should I do next?</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 24 }}>{suggestion.emoji}</span>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ fontSize: 14, color: t.text, lineHeight: 1.5 }}>{suggestion.text}</div>
+        </div>
+        <Btn size="sm" variant="accent" t={t} onClick={() => setPage(suggestion.target)}>{suggestion.action}</Btn>
+      </div>
+    </div>
+  );
+};
+
+// --- MILESTONE MESSAGE ---
+const MilestoneMsg = ({ t, text, tip }) => (
+  <div style={{
+    padding: "14px 18px", borderRadius: 12, marginBottom: 12,
+    background: `${t.success}10`, border: `1px solid ${t.success}33`,
+  }}>
+    <div style={{ fontSize: 14, fontWeight: 600, color: t.success, marginBottom: 4 }}>{text}</div>
+    {tip && <div style={{ fontSize: 13, color: t.textSec }}>{tip}</div>}
+  </div>
+);
+
+// --- FRIENDLY ERROR BOUNDARY ---
+const FriendlyError = ({ t, onRetry }) => (
+  <div style={{ textAlign: "center", padding: 40 }}>
+    <div style={{ fontSize: 48, marginBottom: 16 }}>😅</div>
+    <h2 style={{ fontSize: 22, fontWeight: 800, color: t.text, margin: "0 0 8px" }}>Oops! Something went wrong</h2>
+    <p style={{ fontSize: 15, color: t.textSec, margin: "0 0 20px", lineHeight: 1.6 }}>
+      Don't worry — your data is safe. This is just a small hiccup. Try tapping the button below, or chat with our helper bot in the bottom corner.
+    </p>
+    <Btn t={t} onClick={onRetry}>Try Again</Btn>
+  </div>
+);
+
 // --- CONFETTI (simple CSS animated) ---
 const Confetti = ({ show }) => {
   if (!show) return null;
@@ -449,6 +740,58 @@ export default function LaunchBasedApp() {
     const check = () => setIsMobile(window.innerWidth < 768);
     check(); window.addEventListener("resize", check); return () => window.removeEventListener("resize", check);
   }, []);
+
+  // --- INLINE HELP STATE ---
+  const [showTour, setShowTour] = useState(null); // null or page name to show tour for
+  const [visitedPages, setVisitedPages] = useState(["landing"]);
+  const [dismissedNudges, setDismissedNudges] = useState([]);
+  const [completedMilestones, setCompletedMilestones] = useState([]);
+
+  // Track first visits to trigger guided tours
+  useEffect(() => {
+    if (!visitedPages.includes(page)) {
+      setVisitedPages(prev => [...prev, page]);
+      // Show tour on first visit to key pages
+      if (["dashboard", "agents", "approvals", "integrations"].includes(page)) {
+        setShowTour(page);
+      }
+    }
+  }, [page]);
+
+  // Tour content for each page
+  const tourSteps = {
+    dashboard: [
+      { emoji: "🏠", title: "Welcome to your Command Center!", body: "This is your home base. You can see everything your AI team is doing right here. Think of it like a manager's desk — but your managers are AI!" },
+      { emoji: "📊", title: "Quick Stats", body: "These cards at the top show your key numbers at a glance: how many agents are working, what needs your approval, tasks done today, and new leads this week." },
+      { emoji: "🔴", title: "Live Activity Feed", body: "This is the live feed! Watch your AI team work in real time. Text streams in like someone is typing. You can pause it anytime." },
+      { emoji: "✅", title: "Approve or Reject", body: "When your agents finish something, it shows up in the 'Needs Your Approval' section. Nothing goes live without you saying OK!" },
+    ],
+    agents: [
+      { emoji: "👥", title: "Meet Your AI Team", body: "Here's your full team of 8 AI agents. Each one has a specialty — writing, research, sales, SEO, customer service, operations, social media, and data analysis." },
+      { emoji: "⚡", title: "Working Agents", body: "Agents with a 'Working' badge are busy doing tasks right now. You can see what they're working on and how far along they are." },
+      { emoji: "🎯", title: "Assign Tasks", body: "See an idle agent? Tap 'Assign a Task' and tell them what to do in plain English. Like talking to a real team member!" },
+    ],
+    approvals: [
+      { emoji: "📝", title: "Your Approval Queue", body: "Everything your AI team creates shows up here first. Blog posts, emails, social media posts — nothing goes live until you say it's good." },
+      { emoji: "✅", title: "Three Options", body: "For each item you can: Approve (send it live), Revise (ask for changes), or Block (stop it completely). You're always in control!" },
+    ],
+    integrations: [
+      { emoji: "🔌", title: "Connect Your Tools", body: "Link the apps you already use — like Shopify, Instagram, Gmail, or HubSpot. Your AI team gets smarter when it can work with your real tools!" },
+      { emoji: "⭐", title: "Start with Popular Ones", body: "We recommend starting with 1-2 tools you use the most. You can always add more later. Each connection takes just one click!" },
+    ],
+  };
+
+  // Plain-English agent status messages
+  const agentStatusMessages = {
+    "Emma": { working: "Emma is writing a blog post for you right now", idle: "Emma is ready to write! Give her a topic and she'll start creating." },
+    "James": { working: "James is researching your competitors and market", idle: "James is available to dig into any topic you need." },
+    "Olivia": { working: "Olivia is personalizing emails for your leads", idle: "Olivia is ready to help you reach out to new customers." },
+    "Liam": { working: "Liam is checking your website's SEO score", idle: "Liam can run an SEO audit whenever you're ready." },
+    "Sophia": { working: "Sophia is replying to customer questions", idle: "Sophia is standing by to help your customers." },
+    "Noah": { working: "Noah is coordinating the team's priorities", idle: "Noah is ready to organize your business tasks." },
+    "Ava": { working: "Ava is creating social media posts for this week", idle: "Ava can whip up social content anytime you need it." },
+    "Ethan": { working: "Ethan is crunching your weekly numbers", idle: "Ethan can generate a report whenever you want." },
+  };
 
   // ============================================================
   // LANDING PAGE
@@ -736,7 +1079,12 @@ export default function LaunchBasedApp() {
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 8px" }}>Welcome aboard, {form.firstName || "there"}! 🎉</h1>
         <p style={{ color: t.textSec, fontSize: 16, margin: 0 }}>Let's get your business set up. Follow these steps and you'll be ready to go in minutes.</p>
+        <div style={{ marginTop: 8 }}>{VideoTip({ t, title: "Quick setup walkthrough", duration: "60 sec", onPlay: () => {} })}</div>
       </div>
+
+      {/* Milestone messages */}
+      {completedSteps >= 3 && completedSteps < totalSteps && MilestoneMsg({ t, text: "You're making great progress! More than halfway there.", tip: "Most people finish in about 5 minutes. You're doing awesome!" })}
+      {completedSteps >= 5 && completedSteps < totalSteps && MilestoneMsg({ t, text: "Almost done! Just a couple more steps.", tip: "Your AI team is warming up and ready to start working for you." })}
 
       {/* Progress card */}
       <Card t={t} hover={false} style={{ marginBottom: 24, padding: 24 }}>
@@ -797,11 +1145,20 @@ export default function LaunchBasedApp() {
     return (
       <div>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>
             Command Center
+            <TT text="This is your home base! See everything your AI team is working on, check stats, and approve their work." t={t} />
           </h1>
           <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Here's what your AI team is up to right now.</p>
         </div>
+
+        {/* What should I do next? */}
+        {NextActionCard({ t, form, connectedTools, onboardProgress, page, setPage })}
+
+        {/* Contextual nudge */}
+        {connectedTools.length < 2 && !dismissedNudges.includes("connect-tools-dash") && (
+          NudgeBanner({ t, emoji: "🔌", text: "Your AI team works even better when connected to your tools! Try adding Instagram or Shopify.", actionLabel: "Connect Tools", onAction: () => setPage("integrations"), onDismiss: () => setDismissedNudges(prev => [...prev, "connect-tools-dash"]) })
+        )}
 
         {/* Quick stats */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: isMobile ? 8 : 16, marginBottom: 24 }}>
@@ -930,6 +1287,14 @@ export default function LaunchBasedApp() {
                   {Math.round((streamedChars / currentStreamItem.streamText.length) * 100)}%
                 </span>
               </div>
+              {/* Inline explanation link */}
+              <div style={{ marginTop: 8 }}>
+                <TT text={`${currentStreamItem.agent} is ${currentStreamItem.action} for your business. This is real work being done by your AI team! When finished, it will appear in your Documents page for you to review.`} t={t}>
+                  <span style={{ fontSize: 12, color: t.primary, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Icons.Info /> What does this mean?
+                  </span>
+                </TT>
+              </div>
             </div>
           </div>
 
@@ -969,6 +1334,7 @@ export default function LaunchBasedApp() {
           <Card t={t} hover={false} style={{ padding: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: t.text, margin: "0 0 16px", display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: t.primary }}>⚡</span> Working Now
+              <TT text="These agents are busy doing tasks right now. The progress bar shows how close they are to finishing." t={t} />
             </h3>
             {workingAgents.map(a => (
               <div key={a.name} style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 10, background: t.bg, border: `1px solid ${t.border}` }}>
@@ -985,6 +1351,7 @@ export default function LaunchBasedApp() {
           <Card t={t} hover={false} style={{ padding: 24 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: t.text, margin: "0 0 16px", display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ color: t.warning }}>⏳</span> Needs Your Approval
+              <TT text="Your agents finished these tasks and are waiting for you to review them. Nothing goes live without your OK!" t={t} />
             </h3>
             {pendingApprovals.map(a => (
               <div key={a.name} style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 10, background: t.bg, border: `1px solid ${t.warning}44` }}>
@@ -1041,8 +1408,9 @@ export default function LaunchBasedApp() {
     return (
       <div>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Agent Office</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Agent Office <TT text="This is where your full AI team lives. You can see what each agent is doing, assign them new tasks, or review their work." t={t} /></h1>
           <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Your AI team's workspace. See who's working, who needs your review, and who's available.</p>
+          {VideoTip({ t, title: "Meet your AI team", duration: "45 sec", onPlay: () => {} })}
         </div>
 
         {tables.map(table => (
@@ -1106,8 +1474,9 @@ export default function LaunchBasedApp() {
     return (
       <div>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Approvals</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Approvals <TT text="This is your review queue. Your AI agents create content, but nothing gets published until you approve it here. You're the boss!" t={t} /></h1>
           <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Review what your AI team has done before it goes live. You're always in control.</p>
+          {VideoTip({ t, title: "How approvals work", duration: "30 sec", onPlay: () => {} })}
         </div>
 
         {items.map((item, i) => (
@@ -1145,8 +1514,9 @@ export default function LaunchBasedApp() {
   const WebsitePage = () => (
     <div>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>My Website</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>My Website <TT text="We built a website for your business automatically! You can view it, edit it, or connect your own domain name here." t={t} /></h1>
         <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Your website is live! Here's where you can manage it.</p>
+        <div style={{ marginTop: 8 }}>{VideoTip({ t, title: "Managing your website", duration: "45 sec", onPlay: () => {} })}</div>
       </div>
 
       <Card t={t} hover={false} style={{ marginBottom: 20, padding: 24 }}>
@@ -1213,7 +1583,7 @@ export default function LaunchBasedApp() {
   const AnalyticsPage = () => (
     <div>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Analytics</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Analytics <TT text="These charts show how your business is doing over time. Blue = leads (people interested in you), Purple = content your team created, Green = sales." t={t} /></h1>
         <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Simple charts showing how your business and AI team are doing.</p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
@@ -1258,7 +1628,7 @@ export default function LaunchBasedApp() {
   const DailyBriefPage = () => (
     <div>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Daily Brief ☀️</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Daily Brief ☀️ <TT text="Ethan (your data analyst) creates this summary every morning. It tells you what happened yesterday and what to focus on today." t={t} /></h1>
         <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Your morning summary — everything you need to know to start your day.</p>
       </div>
       <Card t={t} hover={false} style={{ padding: 24, marginBottom: 20 }}>
@@ -1290,7 +1660,7 @@ export default function LaunchBasedApp() {
   const DocsPage = () => (
     <div>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Documents</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Documents <TT text="This is your content library. Every blog post, email, report, and social media plan your AI team creates ends up here. Tap 'View' to read or download." t={t} /></h1>
         <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Everything your AI team has created — blog posts, emails, reports, and more.</p>
       </div>
       {[
@@ -1324,8 +1694,9 @@ export default function LaunchBasedApp() {
   const IntegrationsPage = () => (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px" }}>Integrations</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: t.text, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 8 }}>Integrations <TT text="These are apps and tools your AI team can connect to. When you link a tool like Shopify or Instagram, your agents can work with your real data!" t={t} /></h1>
         <p style={{ color: t.textSec, fontSize: 15, margin: 0 }}>Connect your favorite tools so your AI team can work with them. One click to connect — no tech skills needed.</p>
+        <div style={{ marginTop: 8 }}>{VideoTip({ t, title: "How to connect a tool", duration: "30 sec", onPlay: () => {} })}</div>
       </div>
 
       {/* Search + connected count */}
@@ -1771,6 +2142,12 @@ export default function LaunchBasedApp() {
           </div>
         )}
       </div>
+
+      {/* Floating AI Chat Assistant */}
+      {HelpChat({ t, isMobile, page, form, connectedTools, onboardProgress })}
+
+      {/* Guided Tour */}
+      {showTour && tourSteps[showTour] && GuidedTour({ t, steps: tourSteps[showTour], onClose: () => setShowTour(null) })}
     </div>
   );
 }
