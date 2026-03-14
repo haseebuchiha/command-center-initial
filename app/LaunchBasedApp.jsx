@@ -403,13 +403,13 @@ export default function LaunchBasedApp() {
   const LandingPage = () => (
     <div style={{ minHeight: "100vh", background: `linear-gradient(135deg, ${t.bg} 0%, #0D1B3E 50%, #1A0B2E 100%)`, color: t.text }}>
       {/* Nav */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 40px", maxWidth: 1200, margin: "0 auto" }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: t.primary }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "16px 16px" : "20px 40px", maxWidth: 1200, margin: "0 auto", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: t.primary }}>
           <span style={{ color: t.accent }}>Launch</span>Based
         </div>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <Btn variant="ghost" size="sm" t={t} onClick={() => setPage("orderForm")}>Pricing</Btn>
-          <Btn variant="ghost" size="sm" t={t}>Book a Demo</Btn>
+        <div style={{ display: "flex", gap: isMobile ? 6 : 12, alignItems: "center" }}>
+          {!isMobile && <Btn variant="ghost" size="sm" t={t} onClick={() => setPage("orderForm")}>Pricing</Btn>}
+          {!isMobile && <Btn variant="ghost" size="sm" t={t}>Book a Demo</Btn>}
           <Btn size="sm" t={t} onClick={() => setPage("orderForm")}>Get Started</Btn>
           <div onClick={() => setIsDark(!isDark)} style={{ cursor: "pointer", color: t.textSec, display: "flex", padding: 8 }}>
             {isDark ? <Icons.Sun /> : <Icons.Moon />}
@@ -418,24 +418,24 @@ export default function LaunchBasedApp() {
       </div>
 
       {/* Hero */}
-      <div style={{ textAlign: "center", padding: "80px 20px 40px", maxWidth: 800, margin: "0 auto" }}>
-        <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 20, background: `${t.accent}22`, color: t.accent, fontSize: 14, fontWeight: 600, marginBottom: 24 }}>
+      <div style={{ textAlign: "center", padding: isMobile ? "40px 16px 24px" : "80px 20px 40px", maxWidth: 800, margin: "0 auto" }}>
+        <div style={{ display: "inline-block", padding: "6px 16px", borderRadius: 20, background: `${t.accent}22`, color: t.accent, fontSize: isMobile ? 12 : 14, fontWeight: 600, marginBottom: isMobile ? 16 : 24 }}>
           Your AI Team Is Ready To Work
         </div>
-        <h1 style={{ fontSize: isMobile ? 36 : 56, fontWeight: 800, lineHeight: 1.1, margin: "0 0 24px", background: `linear-gradient(135deg, ${t.text} 0%, ${t.primary} 50%, ${t.accent} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        <h1 style={{ fontSize: isMobile ? 28 : 56, fontWeight: 800, lineHeight: 1.1, margin: "0 0 20px", background: `linear-gradient(135deg, ${t.text} 0%, ${t.primary} 50%, ${t.accent} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Build Your Business With AI Agents That Work 24/7
         </h1>
-        <p style={{ fontSize: 20, color: t.textSec, lineHeight: 1.6, margin: "0 0 40px" }}>
+        <p style={{ fontSize: isMobile ? 16 : 20, color: t.textSec, lineHeight: 1.6, margin: "0 0 32px" }}>
           No coding. No tech skills. Just tell us about your business, and we set up a team of AI agents that builds your website, creates content, finds customers, and grows your business while you sleep.
         </p>
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          <Btn size="lg" t={t} onClick={() => setPage("orderForm")}><Icons.Rocket /> Start Building My Business</Btn>
-          <Btn variant="secondary" size="lg" t={t}>Book a Free Demo Call</Btn>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <Btn size={isMobile ? "md" : "lg"} t={t} onClick={() => setPage("orderForm")}><Icons.Rocket /> Start Building My Business</Btn>
+          <Btn variant="secondary" size={isMobile ? "md" : "lg"} t={t}>Book a Free Demo Call</Btn>
         </div>
       </div>
 
       {/* Feature cards */}
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 20, padding: "60px 40px", maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16, padding: isMobile ? "32px 16px" : "60px 40px", maxWidth: 1100, margin: "0 auto" }}>
         {[
           { icon: "🌐", title: "Website Built For You", desc: "We build your professional website automatically. See a live preview before you sign up." },
           { icon: "🤖", title: "8 AI Agents On Your Team", desc: "A content writer, researcher, sales rep, SEO expert, and more — all working for your business." },
@@ -477,8 +477,8 @@ export default function LaunchBasedApp() {
     return (
       <div style={{ minHeight: "100vh", background: t.bg, color: t.text }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 32px", borderBottom: `1px solid ${t.border}` }}>
-          <div onClick={() => setPage("landing")} style={{ cursor: "pointer", fontSize: 22, fontWeight: 800, color: t.primary }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "12px 16px" : "16px 32px", borderBottom: `1px solid ${t.border}` }}>
+          <div onClick={() => setPage("landing")} style={{ cursor: "pointer", fontSize: isMobile ? 18 : 22, fontWeight: 800, color: t.primary }}>
             <span style={{ color: t.accent }}>Launch</span>Based
           </div>
           <div onClick={() => setIsDark(!isDark)} style={{ cursor: "pointer", color: t.textSec, display: "flex", padding: 8 }}>
@@ -486,13 +486,13 @@ export default function LaunchBasedApp() {
           </div>
         </div>
 
-        <div style={{ maxWidth: 640, margin: "0 auto", padding: "32px 20px" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", padding: isMobile ? "20px 16px" : "32px 20px" }}>
           {/* Progress */}
           <div style={{ marginBottom: 32 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, gap: 4 }}>
               {steps.map((s, i) => (
-                <div key={i} style={{ fontSize: 12, fontWeight: formStep === i ? 700 : 400, color: formStep === i ? t.primary : i < formStep ? t.success : t.textMuted }}>
-                  {i < formStep ? "✓ " : ""}{s}
+                <div key={i} style={{ fontSize: isMobile ? 10 : 12, fontWeight: formStep === i ? 700 : 400, color: formStep === i ? t.primary : i < formStep ? t.success : t.textMuted, textAlign: "center", flex: 1 }}>
+                  {i < formStep ? "✓ " : ""}{isMobile ? s.split(" ")[0] : s}
                 </div>
               ))}
             </div>
@@ -505,7 +505,7 @@ export default function LaunchBasedApp() {
               <>
                 <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: t.text }}>Let's get to know you!</h2>
                 <p style={{ color: t.textSec, margin: "0 0 24px", fontSize: 15 }}>This takes about 5 minutes. Your info is safe with us.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 0 : 16 }}>
                   <Input label="First Name" tooltip="What should we call you?" placeholder="Sara" value={form.firstName} onChange={v => setForm({ ...form, firstName: v })} t={t} required />
                   <Input label="Last Name" placeholder="Johnson" value={form.lastName} onChange={v => setForm({ ...form, lastName: v })} t={t} required />
                 </div>
@@ -527,7 +527,7 @@ export default function LaunchBasedApp() {
               <>
                 <h2 style={{ fontSize: 24, fontWeight: 700, margin: "0 0 8px", color: t.text }}>What are your goals?</h2>
                 <p style={{ color: t.textSec, margin: "0 0 24px", fontSize: 15 }}>Pick the things that matter most right now. Your AI team will focus on these first.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 20 }}>
                   {goalOptions.map(g => (
                     <div key={g} onClick={() => {
                       const goals = form.goals.includes(g) ? form.goals.filter(x => x !== g) : [...form.goals, g];
@@ -625,7 +625,7 @@ export default function LaunchBasedApp() {
                       </div>
                     </div>
                     {/* Features */}
-                    <div style={{ padding: "32px 24px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                    <div style={{ padding: isMobile ? "16px 12px" : "32px 24px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 12 }}>
                       {["Quality Products", "Fast Delivery", "24/7 Support"].map((f, i) => (
                         <div key={i} style={{ textAlign: "center", padding: 16 }}>
                           <div style={{ fontSize: 28, marginBottom: 8 }}>{["⭐", "🚀", "💬"][i]}</div>
@@ -808,20 +808,20 @@ export default function LaunchBasedApp() {
         </div>
 
         {/* Quick stats */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: isMobile ? 8 : 16, marginBottom: 24 }}>
           {[
             { label: "Active Agents", value: "4", icon: "🤖", color: t.primary },
             { label: "Pending Approvals", value: "2", icon: "⏳", color: t.warning },
             { label: "Tasks Done Today", value: "12", icon: "✅", color: t.success },
             { label: "Leads This Week", value: "31", icon: "📈", color: t.accent },
           ].map((s, i) => (
-            <Card key={i} t={t} style={{ padding: 20 }} onClick={s.label === "Pending Approvals" ? () => setPage("approvals") : undefined}>
+            <Card key={i} t={t} style={{ padding: isMobile ? 12 : 20 }} onClick={s.label === "Pending Approvals" ? () => setPage("approvals") : undefined}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <div style={{ fontSize: 13, color: t.textSec, marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ fontSize: 32, fontWeight: 800, color: s.color }}>{s.value}</div>
+                  <div style={{ fontSize: isMobile ? 11 : 13, color: t.textSec, marginBottom: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800, color: s.color }}>{s.value}</div>
                 </div>
-                <div style={{ fontSize: 28 }}>{s.icon}</div>
+                <div style={{ fontSize: isMobile ? 20 : 28 }}>{s.icon}</div>
               </div>
             </Card>
           ))}
@@ -855,7 +855,7 @@ export default function LaunchBasedApp() {
 
           {/* Streaming content area */}
           <div ref={feedRef} style={{
-            height: 380, overflowY: "auto", padding: "0 4px",
+            height: isMobile ? 320 : 380, overflowY: "auto", padding: "0 4px",
             background: `linear-gradient(180deg, ${t.bg} 0%, ${t.bgCard} 100%)`,
           }}>
             {/* Completed feed items (collapsed) */}
@@ -1632,7 +1632,7 @@ export default function LaunchBasedApp() {
 
   if (!isAppPage) {
     return (
-      <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif" }}>
+      <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", minHeight: "100vh", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
         <Confetti show={confetti} />
         {page === "landing" && <LandingPage />}
         {page === "orderForm" && <OrderFormPage />}
@@ -1657,7 +1657,7 @@ export default function LaunchBasedApp() {
   };
 
   return (
-    <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", display: "flex", height: "100vh", background: t.bg, color: t.text, overflow: "hidden" }}>
+    <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", display: "flex", height: "100vh", background: t.bg, color: t.text, overflow: "hidden", WebkitOverflowScrolling: "touch" }}>
       <Confetti show={confetti} />
 
       {/* Mobile overlay */}
@@ -1719,7 +1719,7 @@ export default function LaunchBasedApp() {
       )}
 
       {/* Main content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
         {/* Top bar */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1746,7 +1746,7 @@ export default function LaunchBasedApp() {
         </div>
 
         {/* Page content */}
-        <div style={{ flex: 1, overflow: "auto", padding: isMobile ? 16 : 28 }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: isMobile ? 16 : 28, WebkitOverflowScrolling: "touch" }}>
           {renderPage()}
         </div>
 
@@ -1754,6 +1754,7 @@ export default function LaunchBasedApp() {
         {isMobile && (
           <div style={{
             display: "flex", borderTop: `1px solid ${t.border}`, background: t.bg, flexShrink: 0,
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
           }}>
             {[
               { id: "dashboard", icon: <Icons.Home />, label: "Home" },

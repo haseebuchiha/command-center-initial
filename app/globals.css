@@ -7,6 +7,20 @@
 html, body {
   height: 100%;
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Allow scrolling on mobile for full-page views (landing, order form) */
+@media (max-width: 767px) {
+  html, body {
+    overflow: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* Prevent pull-to-refresh on Android */
+body {
+  overscroll-behavior-y: contain;
 }
 
 ::-webkit-scrollbar {
