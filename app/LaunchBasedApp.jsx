@@ -253,24 +253,77 @@ export default function LaunchBasedApp() {
   const [onboardSteps, setOnboardSteps] = useState([
     { id: 1, label: "Magic link sent! Check your email", done: true },
     { id: 2, label: "Building your website...", done: true },
-    { id: 3, label: "Import your AI profile", done: false, skippable: true },
-    { id: 4, label: "Meet your AI team", done: false, skippable: true },
-    { id: 5, label: "Connect your chat app", done: false },
-    { id: 6, label: "Connect business tools", done: false, skippable: true },
-    { id: 7, label: "Join the LaunchBased community", done: false },
-    { id: 8, label: "Your first win!", done: false },
+    { id: 3, label: "Meet your AI team", done: false, skippable: true },
+    { id: 4, label: "Connect your chat app", done: false },
+    { id: 5, label: "Connect business tools", done: false, skippable: true },
+    { id: 6, label: "Join the LaunchBased community", done: false },
+    { id: 7, label: "Your first win!", done: false },
   ]);
 
   const triggerConfetti = () => { setConfetti(true); setTimeout(() => setConfetti(false), 4000); };
 
   const completeOnboardStep = (id) => {
     setOnboardSteps(prev => prev.map(s => s.id === id ? { ...s, done: true } : s));
-    if (id === 8) triggerConfetti();
+    if (id === 7) triggerConfetti();
   };
 
   const completedSteps = onboardSteps.filter(s => s.done).length;
   const totalSteps = onboardSteps.length;
   const onboardProgress = Math.round((completedSteps / totalSteps) * 100);
+
+  // ---- LIVE ACTIVITY FEED STATE (lifted to parent so hooks stay stable across page switches) ----
+  const activityFeedData = [
+    { agent: "Emma", emoji: "\u270d\ufe0f", action: "writing", color: "#8B5CF6", streamText: "Spring is the perfect time to refresh your business strategy. Here are 10 proven ways to attract new customers this season:\n\n1. **Launch a seasonal promotion** \u2014 Create a limited-time offer tied to spring themes. Think fresh starts, spring cleaning sales, or \"new beginnings\" bundles.\n\n2. **Refresh your social media** \u2014 Update your cover photos, profile pictures, and bio to reflect the season. Post bright, energizing content.\n\n3. **Partner with local businesses** \u2014 Cross-promote with complementary businesses in your area. A bakery + florist collab for Mother\u2019s Day = magic.\n\n4. **Start a referral program** \u2014 Your happiest customers are your best marketers. Give them a reason to spread the word.", label: "Writing blog post: \"10 Ways to Grow Your Business This Spring\"" },
+    { agent: "James", emoji: "\ud83d\udd0d", action: "researching", color: "#3B82F6", streamText: "COMPETITOR ANALYSIS \u2014 March 14, 2026\n\n\u25b8 Scanning competitor websites... 4 found\n\u25b8 Analyzing pricing pages...\n  \u2192 CompetitorA: $49/mo starter, $99/mo pro, $249/mo business\n  \u2192 CompetitorB: $29/mo flat rate, no tiers\n  \u2192 CompetitorC: $79/mo + $0.02/action usage fee\n  \u2192 CompetitorD: Free tier available, $39/mo premium\n\u25b8 Checking social media engagement...\n  \u2192 CompetitorA: 2.3K followers, 4.2% engagement rate\n  \u2192 CompetitorB: 890 followers, 1.8% engagement rate\n\u25b8 Monitoring review sites...\n  \u2192 CompetitorA: 4.2\u2605 on G2 (127 reviews)\n  \u2192 CompetitorC: 3.8\u2605 on Capterra (43 reviews)\n\u25b8 Key insight: CompetitorA launched a 20% spring discount 2 days ago\n\u25b8 Recommendation: Consider matching or differentiating with a value-add bundle", label: "Analyzing competitor pricing and market positioning" },
+    { agent: "Olivia", emoji: "\ud83d\udce7", action: "outreach", color: "#22C55E", streamText: "OUTREACH CAMPAIGN \u2014 Warm Lead Follow-ups\n\n\u25b8 Loading lead list... 12 warm leads found\n\u25b8 Personalizing email #1 of 12...\n  To: sarah.chen@freshfoods.co\n  Subject: Quick follow-up on your demo request\n  Body: Hi Sarah, I noticed you checked out our meal prep automation tools last week. I'd love to show you how other food businesses are saving 15 hours/week...\n\u25b8 Personalizing email #2 of 12...\n  To: mike.torres@urbanfit.com\n  Subject: The fitness studio growth hack you asked about\n  Body: Hey Mike, Great chatting at the conference last week. You mentioned wanting to automate your class scheduling...\n\u25b8 Checking send limits... 47/100 daily limit remaining \u2713\n\u25b8 Running spam score check... Score: 2.1 (excellent)\n\u25b8 Scheduling sends for optimal delivery times...\n  \u2192 3 emails queued for 9:15 AM EST\n  \u2192 4 emails queued for 1:30 PM EST\n  \u2192 5 emails queued for 4:00 PM EST", label: "Personalizing follow-up emails for 12 warm leads" },
+    { agent: "Sophia", emoji: "\ud83d\udcac", action: "responding", color: "#F59E0B", streamText: "CUSTOMER SUPPORT \u2014 Active Tickets\n\n\u25b8 Ticket #1847 \u2014 Priority: Medium\n  From: jenny.williams@email.com\n  Question: \"How do I change my subscription plan?\"\n  \u2192 Drafting response...\n  \"Hi Jenny! Great question. Here's how to change your plan:\n   1. Go to Settings (gear icon, top right)\n   2. Click 'Subscription'\n   3. Choose your new plan\n   4. Click 'Update'\n   Your new plan starts immediately and we'll prorate the difference. Let me know if you need any help!\"\n  \u2192 Response sent \u2713 (avg response time: 47 seconds)\n\n\u25b8 Ticket #1848 \u2014 Priority: High\n  From: robert.kim@techstart.io\n  Question: \"My checkout page isn't loading for customers\"\n  \u2192 Escalating to technical review...\n  \u2192 Checking Shopify API status... all systems operational\n  \u2192 Checking SSL certificate... valid through 2027-01-15\n  \u2192 Running page speed test... loading in 2.3s (acceptable)", label: "Responding to 3 customer support tickets" },
+    { agent: "Ethan", emoji: "\ud83d\udcca", action: "analyzing", color: "#EC4899", streamText: "WEEKLY PERFORMANCE REPORT \u2014 Generating...\n\n\u25b8 Pulling revenue data...\n  This week:  $3,821 (+12.4% vs last week)\n  Last week:  $3,399\n  Monthly:    $14,207 (73% of $19,500 goal)\n\n\u25b8 Pulling traffic data...\n  Website visits: 1,847 (+23% vs last week)\n  Unique visitors: 1,204\n  Bounce rate: 34% (improved from 41%)\n  Top pages: /products (34%), /about (21%), /blog (18%)\n\n\u25b8 Pulling conversion data...\n  Email signups: 47 new subscribers\n  Contact form: 12 submissions\n  Purchases: 31 orders (1.67% conversion rate)\n\n\u25b8 Pulling social media data...\n  Instagram: +89 followers, 4.7% engagement\n  Facebook: +34 followers, 2.1% engagement\n  Best post: Spring sale carousel (2,341 impressions)\n\n\u25b8 AI Insights:\n  \u2192 Traffic spike correlates with Tuesday blog post\n  \u2192 Email open rate improved after subject line A/B test\n  \u2192 Recommend increasing ad spend on Instagram (best ROI)", label: "Generating weekly performance analytics report" },
+    { agent: "Liam", emoji: "\ud83d\udcc8", action: "optimizing", color: "#06B6D4", streamText: "SEO OPTIMIZATION \u2014 Site Audit Running...\n\n\u25b8 Crawling 47 pages...\n  \u2192 42 pages indexed \u2713\n  \u2192 5 pages missing meta descriptions \u26a0\ufe0f\n  \u2192 0 broken links \u2713\n\n\u25b8 Keyword rankings update:\n  \u2192 \"custom cakes near me\" \u2014 Position #4 (\u21912)\n  \u2192 \"wedding cake delivery\" \u2014 Position #7 (\u21915)\n  \u2192 \"birthday cake order online\" \u2014 Position #12 (\u2192)\n  \u2192 \"bakery catering services\" \u2014 Position #18 (\u21913)\n\n\u25b8 Content gap analysis:\n  \u2192 Competitors ranking for \"gluten free cake\" \u2014 you have no content\n  \u2192 Competitors ranking for \"cake decorating ideas\" \u2014 you have 1 thin page\n  \u2192 Recommendation: Create 2 new blog posts targeting these keywords\n\n\u25b8 Technical SEO:\n  \u2192 Page speed: 2.1s mobile, 1.3s desktop \u2713\n  \u2192 Core Web Vitals: All passing \u2713\n  \u2192 Schema markup: Added to 3 product pages\n  \u2192 Sitemap: Updated and submitted to Google", label: "Running full SEO audit and keyword tracking" },
+    { agent: "Ava", emoji: "\ud83d\udcf1", action: "creating", color: "#F97316", streamText: "SOCIAL MEDIA \u2014 Creating this week's content...\n\n\u25b8 Analyzing top-performing posts from last 30 days...\n  \u2192 Carousels: avg 342 impressions, 4.8% engagement\n  \u2192 Reels: avg 1,247 impressions, 6.2% engagement\n  \u2192 Single images: avg 198 impressions, 2.1% engagement\n  \u2192 Strategy: Prioritize reels and carousels this week\n\n\u25b8 Creating Post #1 (Instagram Carousel):\n  \u2192 Topic: \"5 Things Every New Business Owner Needs to Know\"\n  \u2192 Slide 1: Bold hook text on brand-colored background\n  \u2192 Slide 2: Tip #1 \u2014 Start with one product, not ten\n  \u2192 Slide 3: Tip #2 \u2014 Your first 100 customers matter most\n  \u2192 Slide 4: Tip #3 \u2014 Consistency beats perfection\n  \u2192 Slide 5: CTA \u2014 \"Save this for later! Follow for more tips\"\n  \u2192 Hashtags: #smallbusiness #entrepreneur #biztips #startup2026\n  \u2192 Scheduled: Tuesday 11:30 AM EST (peak engagement time)\n\n\u25b8 Creating Post #2 (Instagram Reel):\n  \u2192 Concept: Behind-the-scenes of a customer order being prepared\n  \u2192 Duration: 15 seconds\n  \u2192 Audio: Trending sound #spring2026\n  \u2192 Scheduled: Thursday 6:00 PM EST", label: "Planning and creating social media content for the week" },
+  ];
+  const [feedItems, setFeedItems] = useState([]);
+  const [streamingIdx, setStreamingIdx] = useState(0);
+  const [streamedChars, setStreamedChars] = useState(0);
+  const [feedPaused, setFeedPaused] = useState(false);
+  const feedRef = useCallback(node => {
+    if (node) node.scrollTop = node.scrollHeight;
+  }, [feedItems, streamedChars]);
+
+  // Streaming effect — only runs when on dashboard
+  useEffect(() => {
+    if (page !== "dashboard" || feedPaused) return;
+    const currentItem = activityFeedData[streamingIdx % activityFeedData.length];
+    const fullText = currentItem.streamText;
+
+    if (streamedChars < fullText.length) {
+      const ch = fullText[streamedChars];
+      const isNewline = ch === '\n';
+      const isPunctuation = '.!?:'.includes(ch);
+      const delay = isNewline ? 120 : isPunctuation ? 80 : (15 + Math.random() * 25);
+
+      const timer = setTimeout(() => {
+        setStreamedChars(prev => prev + 1);
+      }, delay);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setFeedItems(prev => {
+          const newItems = [...prev, {
+            ...currentItem,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            id: Date.now(),
+          }];
+          return newItems.slice(-20);
+        });
+        setStreamingIdx(prev => prev + 1);
+        setStreamedChars(0);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [streamedChars, streamingIdx, feedPaused, page]);
+
+  const currentStreamItem = activityFeedData[streamingIdx % activityFeedData.length];
+  const currentStreamText = currentStreamItem.streamText.substring(0, streamedChars);
 
   // ---- NAVIGATION ----
   // Integrations state
@@ -740,63 +793,6 @@ export default function LaunchBasedApp() {
   const DashboardPage = () => {
     const workingAgents = agents.filter(a => a.status === "working");
     const pendingApprovals = agents.filter(a => a.status === "approval");
-
-    // --- LIVE ACTIVITY FEED with streaming simulation ---
-    const activityFeedData = [
-      { agent: "Emma", emoji: "✍️", action: "writing", color: "#8B5CF6", streamText: "Spring is the perfect time to refresh your business strategy. Here are 10 proven ways to attract new customers this season:\n\n1. **Launch a seasonal promotion** — Create a limited-time offer tied to spring themes. Think fresh starts, spring cleaning sales, or \"new beginnings\" bundles.\n\n2. **Refresh your social media** — Update your cover photos, profile pictures, and bio to reflect the season. Post bright, energizing content.\n\n3. **Partner with local businesses** — Cross-promote with complementary businesses in your area. A bakery + florist collab for Mother's Day = magic.\n\n4. **Start a referral program** — Your happiest customers are your best marketers. Give them a reason to spread the word.", label: "Writing blog post: \"10 Ways to Grow Your Business This Spring\"" },
-      { agent: "James", emoji: "🔍", action: "researching", color: "#3B82F6", streamText: "COMPETITOR ANALYSIS — March 14, 2026\n\n▸ Scanning competitor websites... 4 found\n▸ Analyzing pricing pages...\n  → CompetitorA: $49/mo starter, $99/mo pro, $249/mo business\n  → CompetitorB: $29/mo flat rate, no tiers\n  → CompetitorC: $79/mo + $0.02/action usage fee\n  → CompetitorD: Free tier available, $39/mo premium\n▸ Checking social media engagement...\n  → CompetitorA: 2.3K followers, 4.2% engagement rate\n  → CompetitorB: 890 followers, 1.8% engagement rate\n▸ Monitoring review sites...\n  → CompetitorA: 4.2★ on G2 (127 reviews)\n  → CompetitorC: 3.8★ on Capterra (43 reviews)\n▸ Key insight: CompetitorA launched a 20% spring discount 2 days ago\n▸ Recommendation: Consider matching or differentiating with a value-add bundle", label: "Analyzing competitor pricing and market positioning" },
-      { agent: "Olivia", emoji: "📧", action: "outreach", color: "#22C55E", streamText: "OUTREACH CAMPAIGN — Warm Lead Follow-ups\n\n▸ Loading lead list... 12 warm leads found\n▸ Personalizing email #1 of 12...\n  To: sarah.chen@freshfoods.co\n  Subject: Quick follow-up on your demo request\n  Body: Hi Sarah, I noticed you checked out our meal prep automation tools last week. I'd love to show you how other food businesses are saving 15 hours/week...\n▸ Personalizing email #2 of 12...\n  To: mike.torres@urbanfit.com\n  Subject: The fitness studio growth hack you asked about\n  Body: Hey Mike, Great chatting at the conference last week. You mentioned wanting to automate your class scheduling...\n▸ Checking send limits... 47/100 daily limit remaining ✓\n▸ Running spam score check... Score: 2.1 (excellent)\n▸ Scheduling sends for optimal delivery times...\n  → 3 emails queued for 9:15 AM EST\n  → 4 emails queued for 1:30 PM EST\n  → 5 emails queued for 4:00 PM EST", label: "Personalizing follow-up emails for 12 warm leads" },
-      { agent: "Sophia", emoji: "💬", action: "responding", color: "#F59E0B", streamText: "CUSTOMER SUPPORT — Active Tickets\n\n▸ Ticket #1847 — Priority: Medium\n  From: jenny.williams@email.com\n  Question: \"How do I change my subscription plan?\"\n  → Drafting response...\n  \"Hi Jenny! Great question. Here's how to change your plan:\n   1. Go to Settings (gear icon, top right)\n   2. Click 'Subscription'\n   3. Choose your new plan\n   4. Click 'Update'\n   Your new plan starts immediately and we'll prorate the difference. Let me know if you need any help!\"\n  → Response sent ✓ (avg response time: 47 seconds)\n\n▸ Ticket #1848 — Priority: High\n  From: robert.kim@techstart.io\n  Question: \"My checkout page isn't loading for customers\"\n  → Escalating to technical review...\n  → Checking Shopify API status... all systems operational\n  → Checking SSL certificate... valid through 2027-01-15\n  → Running page speed test... loading in 2.3s (acceptable)", label: "Responding to 3 customer support tickets" },
-      { agent: "Ethan", emoji: "📊", action: "analyzing", color: "#EC4899", streamText: "WEEKLY PERFORMANCE REPORT — Generating...\n\n▸ Pulling revenue data...\n  This week:  $3,821 (+12.4% vs last week)\n  Last week:  $3,399\n  Monthly:    $14,207 (73% of $19,500 goal)\n\n▸ Pulling traffic data...\n  Website visits: 1,847 (+23% vs last week)\n  Unique visitors: 1,204\n  Bounce rate: 34% (improved from 41%)\n  Top pages: /products (34%), /about (21%), /blog (18%)\n\n▸ Pulling conversion data...\n  Email signups: 47 new subscribers\n  Contact form: 12 submissions\n  Purchases: 31 orders (1.67% conversion rate)\n\n▸ Pulling social media data...\n  Instagram: +89 followers, 4.7% engagement\n  Facebook: +34 followers, 2.1% engagement\n  Best post: Spring sale carousel (2,341 impressions)\n\n▸ AI Insights:\n  → Traffic spike correlates with Tuesday blog post\n  → Email open rate improved after subject line A/B test\n  → Recommend increasing ad spend on Instagram (best ROI)", label: "Generating weekly performance analytics report" },
-      { agent: "Liam", emoji: "📈", action: "optimizing", color: "#06B6D4", streamText: "SEO OPTIMIZATION — Site Audit Running...\n\n▸ Crawling 47 pages...\n  → 42 pages indexed ✓\n  → 5 pages missing meta descriptions ⚠️\n  → 0 broken links ✓\n\n▸ Keyword rankings update:\n  → \"custom cakes near me\" — Position #4 (↑2)\n  → \"wedding cake delivery\" — Position #7 (↑5)\n  → \"birthday cake order online\" — Position #12 (→)\n  → \"bakery catering services\" — Position #18 (↑3)\n\n▸ Content gap analysis:\n  → Competitors ranking for \"gluten free cake\" — you have no content\n  → Competitors ranking for \"cake decorating ideas\" — you have 1 thin page\n  → Recommendation: Create 2 new blog posts targeting these keywords\n\n▸ Technical SEO:\n  → Page speed: 2.1s mobile, 1.3s desktop ✓\n  → Core Web Vitals: All passing ✓\n  → Schema markup: Added to 3 product pages\n  → Sitemap: Updated and submitted to Google", label: "Running full SEO audit and keyword tracking" },
-      { agent: "Ava", emoji: "📱", action: "creating", color: "#F97316", streamText: "SOCIAL MEDIA — Creating this week's content...\n\n▸ Analyzing top-performing posts from last 30 days...\n  → Carousels: avg 342 impressions, 4.8% engagement\n  → Reels: avg 1,247 impressions, 6.2% engagement\n  → Single images: avg 198 impressions, 2.1% engagement\n  → Strategy: Prioritize reels and carousels this week\n\n▸ Creating Post #1 (Instagram Carousel):\n  → Topic: \"5 Things Every New Business Owner Needs to Know\"\n  → Slide 1: Bold hook text on brand-colored background\n  → Slide 2: Tip #1 — Start with one product, not ten\n  → Slide 3: Tip #2 — Your first 100 customers matter most\n  → Slide 4: Tip #3 — Consistency beats perfection\n  → Slide 5: CTA — \"Save this for later! Follow for more tips\"\n  → Hashtags: #smallbusiness #entrepreneur #biztips #startup2026\n  → Scheduled: Tuesday 11:30 AM EST (peak engagement time)\n\n▸ Creating Post #2 (Instagram Reel):\n  → Concept: Behind-the-scenes of a customer order being prepared\n  → Duration: 15 seconds\n  → Audio: Trending sound #spring2026\n  → Scheduled: Thursday 6:00 PM EST", label: "Planning and creating social media content for the week" },
-    ];
-
-    const [feedItems, setFeedItems] = useState([]);
-    const [streamingIdx, setStreamingIdx] = useState(0);
-    const [streamedChars, setStreamedChars] = useState(0);
-    const [feedPaused, setFeedPaused] = useState(false);
-    const feedRef = useCallback(node => {
-      if (node) node.scrollTop = node.scrollHeight;
-    }, [feedItems, streamedChars]);
-
-    // Simulate streaming character by character
-    useEffect(() => {
-      if (feedPaused) return;
-      const currentItem = activityFeedData[streamingIdx % activityFeedData.length];
-      const fullText = currentItem.streamText;
-
-      if (streamedChars < fullText.length) {
-        // Stream characters — variable speed for realism
-        const ch = fullText[streamedChars];
-        const isNewline = ch === '\n';
-        const isPunctuation = '.!?:'.includes(ch);
-        const delay = isNewline ? 120 : isPunctuation ? 80 : (15 + Math.random() * 25);
-
-        const timer = setTimeout(() => {
-          setStreamedChars(prev => prev + 1);
-        }, delay);
-        return () => clearTimeout(timer);
-      } else {
-        // Current item done streaming — pause, then start next
-        const timer = setTimeout(() => {
-          setFeedItems(prev => {
-            const newItems = [...prev, {
-              ...currentItem,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-              id: Date.now(),
-            }];
-            return newItems.slice(-20); // Keep last 20 completed items
-          });
-          setStreamingIdx(prev => prev + 1);
-          setStreamedChars(0);
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
-    }, [streamedChars, streamingIdx, feedPaused]);
-
-    const currentStreamItem = activityFeedData[streamingIdx % activityFeedData.length];
-    const currentStreamText = currentStreamItem.streamText.substring(0, streamedChars);
 
     return (
       <div>
