@@ -1634,25 +1634,25 @@ export default function LaunchBasedApp() {
     return (
       <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", minHeight: "100vh", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" }}>
         <Confetti show={confetti} />
-        {page === "landing" && <LandingPage />}
-        {page === "orderForm" && <OrderFormPage />}
+        {page === "landing" && LandingPage()}
+        {page === "orderForm" && OrderFormPage()}
       </div>
     );
   }
 
   const renderPage = () => {
     switch (page) {
-      case "dashboard": return <DashboardPage />;
-      case "agents": return <AgentOfficePage />;
-      case "approvals": return <ApprovalsPage />;
-      case "integrations": return <IntegrationsPage />;
-      case "onboarding": return <OnboardingPage />;
-      case "website": return <WebsitePage />;
-      case "analytics": return <AnalyticsPage />;
-      case "daily": return <DailyBriefPage />;
-      case "docs": return <DocsPage />;
-      case "settings": return <SettingsPage />;
-      default: return <DashboardPage />;
+      case "dashboard": return DashboardPage();
+      case "agents": return AgentOfficePage();
+      case "approvals": return ApprovalsPage();
+      case "integrations": return IntegrationsPage();
+      case "onboarding": return OnboardingPage();
+      case "website": return WebsitePage();
+      case "analytics": return AnalyticsPage();
+      case "daily": return DailyBriefPage();
+      case "docs": return DocsPage();
+      case "settings": return SettingsPage();
+      default: return DashboardPage();
     }
   };
 
