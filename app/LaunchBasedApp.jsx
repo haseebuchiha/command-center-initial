@@ -10,7 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer,
 // --- THEME ---
 const dark = {
   bg: "#0B1120", bgCard: "#111B2E", bgElevated: "#162032", bgHover: "#1E2D47",
-  text: "#F0F4FF", textSec: "#94A3C8", textMuted: "#5A6B8A",
+  text: "#F0F4FF", textSec: "#A8B8D8", textMuted: "#7B8FB5",
   primary: "#3B82F6", primaryHover: "#60A5FA", accent: "#8B5CF6", accentHover: "#A78BFA",
   success: "#22C55E", warning: "#F59E0B", error: "#EF4444",
   border: "#1E2D47", borderActive: "#3B82F6",
@@ -629,7 +629,7 @@ export default function LaunchBasedApp() {
                       {["Quality Products", "Fast Delivery", "24/7 Support"].map((f, i) => (
                         <div key={i} style={{ textAlign: "center", padding: 16 }}>
                           <div style={{ fontSize: 28, marginBottom: 8 }}>{["⭐", "🚀", "💬"][i]}</div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: "#1E293B" }}>{f}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: themes.find(th => th.id === form.theme)?.colors[1] || "#1E293B" }}>{f}</div>
                         </div>
                       ))}
                     </div>
@@ -1657,7 +1657,7 @@ export default function LaunchBasedApp() {
   };
 
   return (
-    <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", display: "flex", height: "100vh", background: t.bg, color: t.text, overflow: "hidden", WebkitOverflowScrolling: "touch" }}>
+    <div style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", display: "flex", height: "100dvh", background: t.bg, color: t.text, overflow: "hidden", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <Confetti show={confetti} />
 
       {/* Mobile overlay */}
@@ -1669,7 +1669,7 @@ export default function LaunchBasedApp() {
       {(!isMobile || mobileSidebar) && (
         <div style={{
           width: 240, background: t.bg, borderRight: `1px solid ${t.border}`,
-          display: "flex", flexDirection: "column", flexShrink: 0, height: "100vh",
+          display: "flex", flexDirection: "column", flexShrink: 0, height: "100dvh",
           ...(isMobile ? { position: "fixed", left: 0, top: 0, bottom: 0, zIndex: 999 } : {}),
         }}>
           {/* Logo */}

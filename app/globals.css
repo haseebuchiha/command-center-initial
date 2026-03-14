@@ -6,6 +6,7 @@
 
 html, body {
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
@@ -21,6 +22,7 @@ html, body {
 /* Prevent pull-to-refresh on Android */
 body {
   overscroll-behavior-y: contain;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 ::-webkit-scrollbar {
@@ -66,4 +68,18 @@ button, [role="button"] {
 
 input:focus, textarea:focus, select:focus {
   outline: none;
+}
+
+/* Fix placeholder text visibility in dark mode */
+::placeholder {
+  color: #7B8FB5 !important;
+  opacity: 1;
+}
+::-webkit-input-placeholder {
+  color: #7B8FB5 !important;
+  opacity: 1;
+}
+::-moz-placeholder {
+  color: #7B8FB5 !important;
+  opacity: 1;
 }
