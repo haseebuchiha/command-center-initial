@@ -1,0 +1,55 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E2D47;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
+}
+
+/* Smooth transitions for dark/light mode */
+* {
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Fix select styling in dark mode */
+select option {
+  background: #111B2E;
+  color: #F0F4FF;
+}
+
+/* Prevent text selection on UI elements */
+button, [role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
