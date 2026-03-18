@@ -3,10 +3,9 @@ region: nyc
 services:
   - name: web
     github:
-      repo: launchbased/launchbased-command-center
       branch: main
       deploy_on_push: true
-    build_command: npm install && npm run build
+    build_command: npm install && npx prisma generate && npm run build
     run_command: npm start
     http_port: 3000
     instance_count: 1
@@ -16,3 +15,6 @@ services:
     envs:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
