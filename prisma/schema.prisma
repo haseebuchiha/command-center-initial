@@ -24,6 +24,14 @@ model User {
 
   sessions       Session[]
   passwordResets PasswordReset[]
+
+  agents           Agent[]
+  userIntegrations UserIntegration[]
+  approvals        Approval[]
+  documents        Document[]
+  onboardSteps     OnboardStep[]
+  tokenUsages      TokenUsage[]
+  dailyBriefs      DailyBrief[]
 }
 
 model Session {
@@ -45,4 +53,122 @@ model PasswordReset {
   expiresAt DateTime
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agent {
+  id          String        @id @default(cuid())
+  name        String
+  role        String
+  emoji       String
+  status      String        @default("idle")
+  task        String?
+  progress    Int           @default(0)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approvals   Approval[]
+  tokenUsages TokenUsage[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Integration {
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  name             String
+  category         String
+  icon             String
+  description      String
+  popular          Boolean           @default(false)
+  userIntegrations UserIntegration[]
+}
+
+model UserIntegration {
+  id            String      @id @default(cuid())
+  userId        String
+  integrationId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, integrationId])
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  preview   String
+  status    String   @default("pending")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  title     String
+  agentName String
+  type      String
+  icon      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model OnboardStep {
+  id        String  @id @default(cuid())
+  label     String
+  sortOrder Int
+  done      Boolean @default(false)
+  skippable Boolean @default(false)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sortOrder])
+}
+
+model TokenUsage {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tokens    Int
+  date      DateTime @db.Date
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model DailyBrief {
+  id        String   @id @default(cuid())
+  emoji     String
+  title     String
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+}
+
+model OrderSubmission {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  bizName       String
+  bizDesc       String
+  idealCustomer String?
+  bizType       String
+  industry      String?
+  goals         String[]
+  hasWebsite    Boolean  @default(false)
+  currentUrl    String?
+  revenueGoal   String?
+  theme         String
+  inspireUrls   String[]
+  colors        String?
+  createdAt     DateTime @default(now())
 }
