@@ -3,9 +3,8 @@ import { Metadata } from 'next';
 
 export function generateMetadata(): Metadata {
   return {
-    title: 'AI Prototyper Home',
-    description:
-      'Welcome to AI Prototyper - Build and test your AI-powered ideas quickly.',
+    title: 'LaunchBased - Command Center',
+    description: 'AI Agent Teams Made Easy for Solopreneurs.',
   };
 }
 

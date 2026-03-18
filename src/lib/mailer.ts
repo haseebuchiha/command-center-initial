@@ -32,6 +32,6 @@ const parseConfig = () => {
 };
 
 export const mailer = new MailService({
-  from: 'AI Prototyper Template <info@aiprototypertemplate.com>',
+  from: 'LaunchBased <info@launchbased.com>',
   ...parseConfig(),
 });

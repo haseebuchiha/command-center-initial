@@ -6,7 +6,7 @@ export const Header = () => {
   return (
     <Section className="bg-blue-600 px-8 py-6">
       <Link href={baseUrl('/')} className="text-white no-underline">
-        <Text className="text-2xl font-bold text-white m-0">AI Prototyper</Text>
+        <Text className="text-2xl font-bold text-white m-0">LaunchBased</Text>
       </Link>
     </Section>
   );

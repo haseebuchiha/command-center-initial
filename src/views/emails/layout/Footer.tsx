@@ -8,11 +8,11 @@ export const Footer = () => {
       <Text className="text-gray-700 text-base leading-6 mb-4">
         Best regards,
         <br />
-        <strong>The AI Prototyper Team</strong>
+        <strong>The LaunchBased Team</strong>
       </Text>
 
       <Text className="text-gray-600 text-sm leading-5 mb-2">
-        This email was sent from AI Prototyper. If you have any questions,
+        This email was sent from LaunchBased. If you have any questions,
         please don&apos;t hesitate to{' '}
         <Link
           href={`${baseUrl('/contact')}`}
@@ -24,7 +24,7 @@ export const Footer = () => {
       </Text>
 
       <Text className="text-gray-500 text-xs leading-4">
-        © {new Date().getFullYear()} AI Prototyper. All rights reserved.
+        © {new Date().getFullYear()} LaunchBased. All rights reserved.
         <br />
         <Link
           href={`${baseUrl('/unsubscribe')}`}
