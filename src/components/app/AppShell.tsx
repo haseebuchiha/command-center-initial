@@ -1,13 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { User } from '@/generated/prisma/client';
 import { AppSidebar } from './AppSidebar';
 import { AppTopBar } from './AppTopBar';
 import { AppMobileNav } from './AppMobileNav';
 import { HelpChat } from './HelpChat';
 import { Confetti } from './Confetti';
+import { GuidedTour } from './GuidedTour';
 import { useCommandCenterStore } from '@/lib/stores/command-center-store';
+import { tourSteps } from '@/lib/data/tour-steps';
+
+const pathToPageKey: Record<string, string> = {
+  '/dashboard': 'dashboard',
+  '/agents': 'agents',
+  '/approvals': 'approvals',
+  '/integrations': 'integrations',
+};
 
 export const AppShell = ({
   user,
@@ -16,8 +26,23 @@ export const AppShell = ({
   user: User;
   children: React.ReactNode;
 }) => {
+  const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const confetti = useCommandCenterStore((s) => s.confetti);
+  const visitedPages = useCommandCenterStore((s) => s.visitedPages);
+  const markPageVisited = useCommandCenterStore((s) => s.markPageVisited);
+
+  const pageKey = pathToPageKey[pathname];
+  const shouldShowTour =
+    pageKey != null &&
+    !visitedPages.includes(pageKey) &&
+    tourSteps[pageKey] != null;
+
+  const handleCloseTour = () => {
+    if (pageKey) {
+      markPageVisited(pageKey);
+    }
+  };
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background text-foreground">
@@ -61,6 +86,11 @@ export const AppShell = ({
 
       {/* Floating help chat */}
       <HelpChat />
+
+      {/* Guided tour on first visit */}
+      {shouldShowTour && pageKey && (
+        <GuidedTour steps={tourSteps[pageKey]} onClose={handleCloseTour} />
+      )}
     </div>
   );
 };
