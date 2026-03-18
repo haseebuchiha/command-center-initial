@@ -1,5 +1,5 @@
-import { generateMetadata, HomeController } from '@/controllers/HomeController';
+import { redirect } from 'next/navigation';
 
-export { generateMetadata };
-
-export default HomeController;
+export default function HomePage() {
+  redirect('/dashboard');
+}
