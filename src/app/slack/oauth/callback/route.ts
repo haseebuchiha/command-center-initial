@@ -83,7 +83,8 @@ export async function GET(request: NextRequest) {
       throw new Error('Slack integration not found in database');
     }
 
-    await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await prisma.$transaction(async (tx: any) => {
       const userIntegration = await tx.userIntegration.upsert({
         where: {
           userId_integrationId: {
