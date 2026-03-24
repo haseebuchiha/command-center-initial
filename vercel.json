@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/app/qstash/**/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
