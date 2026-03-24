@@ -7,7 +7,7 @@ const prisma = new PrismaClient({ adapter });
 const integrations = [
   // Chat Apps
   { slug: "discord", name: "Discord", category: "chat", icon: "💬", description: "Chat with your AI team and get notifications in Discord channels.", popular: true },
-  { slug: "slack", name: "Slack", category: "chat", icon: "📨", description: "Send and receive messages through Slack workspaces and channels.", popular: true },
+  { slug: "slack", name: "Slack", category: "chat", icon: "📨", description: "Send and receive messages through Slack workspaces and channels.", popular: true, authType: "oauth" as const },
   { slug: "telegram", name: "Telegram", category: "chat", icon: "✈️", description: "Message your AI team from Telegram on your phone.", popular: true },
   { slug: "whatsapp", name: "WhatsApp", category: "chat", icon: "📞", description: "Talk to your AI agents through WhatsApp messages.", popular: false },
   { slug: "teams", name: "Microsoft Teams", category: "chat", icon: "🟦", description: "Connect to your Teams workspace for business communication.", popular: false },
@@ -88,6 +88,7 @@ async function main() {
         icon: integration.icon,
         description: integration.description,
         popular: integration.popular,
+        authType: integration.authType ?? 'toggle',
       },
       create: integration,
     });

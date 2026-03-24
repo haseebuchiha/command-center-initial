@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +10,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Info, X, Zap, Search } from 'lucide-react';
+import { Info, X, Zap, Search, ExternalLink } from 'lucide-react';
 import { VideoTip } from '@/components/app/VideoTip';
 import { intCategories } from '@/lib/data/integration-categories';
 import { useAction } from 'next-safe-action/hooks';
 import { toggleIntegrationAction } from '@/actions/integrations/toggleIntegrationAction';
 import { toast } from 'sonner';
+import { route } from '@/lib/route';
 import type { Integration } from '@/generated/prisma/client';
+
+type ConnectedInfo = {
+  slug: string;
+  teamName?: string | null;
+};
 
 const categoryCapabilities: Record<string, string> = {
   crm: 'View and update contacts, track deals, log activities, sync lead data from outreach campaigns, and generate pipeline reports.',
@@ -40,15 +46,38 @@ const categoryCapabilities: Record<string, string> = {
 
 export const Integrations = ({
   integrations,
-  connectedSlugs: initialConnected,
+  connectedInfo: initialConnectedInfo,
 }: {
   integrations: Integration[];
-  connectedSlugs: string[];
+  connectedInfo: ConnectedInfo[];
 }) => {
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [modalSlug, setModalSlug] = useState<string | null>(null);
-  const [connected, setConnected] = useState<string[]>(initialConnected);
+  const [connectedInfo, setConnectedInfo] =
+    useState<ConnectedInfo[]>(initialConnectedInfo);
+
+  const connected = connectedInfo.map((c) => c.slug);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauth = params.get('oauth');
+    if (oauth === 'success') {
+      toast.success('Slack connected successfully!');
+      window.history.replaceState({}, '', '/integrations');
+    } else if (oauth === 'error') {
+      const reason = params.get('reason');
+      const messages: Record<string, string> = {
+        denied: 'You declined the authorization request.',
+        missing_params: 'Missing required parameters from Slack.',
+        invalid_state: 'Invalid security token. Please try again.',
+        token_exchange_failed: 'Failed to exchange authorization code.',
+        server_error: 'An unexpected error occurred. Please try again.',
+      };
+      toast.error(messages[reason ?? ''] ?? 'Failed to connect to Slack.');
+      window.history.replaceState({}, '', '/integrations');
+    }
+  }, []);
 
   const { execute, isPending } = useAction(toggleIntegrationAction, {
     onSuccess: () => {
@@ -61,11 +90,31 @@ export const Integrations = ({
 
   const toggleConnect = (slug: string) => {
     // Optimistic update
-    setConnected((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
-    );
+    if (connected.includes(slug)) {
+      setConnectedInfo((prev) => prev.filter((c) => c.slug !== slug));
+    } else {
+      setConnectedInfo((prev) => [...prev, { slug }]);
+    }
     execute({ integrationSlug: slug });
     setModalSlug(null);
+  };
+
+  const handleConnect = (integ: Integration) => {
+    if (integ.authType === 'oauth') {
+      window.location.href = route('slack.oauth.start');
+    } else {
+      toggleConnect(integ.slug);
+    }
+  };
+
+  const handleDisconnect = (integ: Integration) => {
+    if (integ.authType === 'oauth') {
+      const confirmed = confirm(
+        "Disconnecting will revoke access. You'll need to re-authorize to reconnect."
+      );
+      if (!confirmed) return;
+    }
+    toggleConnect(integ.slug);
   };
 
   const filtered = integrations.filter((i) => {
@@ -80,6 +129,9 @@ export const Integrations = ({
   const modalInteg = modalSlug
     ? integrations.find((i) => i.slug === modalSlug)
     : null;
+
+  const getTeamName = (slug: string) =>
+    connectedInfo.find((c) => c.slug === slug)?.teamName;
 
   return (
     <div>
@@ -164,6 +216,7 @@ export const Integrations = ({
               .slice(0, 9)
               .map((integ) => {
                 const isConn = connected.includes(integ.slug);
+                const teamName = getTeamName(integ.slug);
                 return (
                   <Card
                     key={integ.slug}
@@ -182,12 +235,19 @@ export const Integrations = ({
                           </div>
                         </div>
                         {isConn ? (
-                          <Badge
-                            variant="outline"
-                            className="border-success/30 text-success"
-                          >
-                            Connected
-                          </Badge>
+                          <div className="flex flex-col items-end gap-0.5">
+                            <Badge
+                              variant="outline"
+                              className="border-success/30 text-success"
+                            >
+                              Connected
+                            </Badge>
+                            {teamName && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {teamName}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <Button
                             size="sm"
@@ -236,6 +296,7 @@ export const Integrations = ({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((integ) => {
             const isConn = connected.includes(integ.slug);
+            const teamName = getTeamName(integ.slug);
             return (
               <Card key={integ.slug}>
                 <CardContent className="flex items-center gap-3 p-4">
@@ -268,8 +329,13 @@ export const Integrations = ({
                         >
                           Connected
                         </Badge>
+                        {teamName && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {teamName}
+                          </span>
+                        )}
                         <button
-                          onClick={() => toggleConnect(integ.slug)}
+                          onClick={() => handleDisconnect(integ)}
                           className="text-[11px] text-destructive"
                           disabled={isPending}
                         >
@@ -331,14 +397,24 @@ export const Integrations = ({
                   "Connect this tool to enhance your AI team's capabilities."}
               </div>
             </div>
+            {modalInteg.authType === 'oauth' && (
+              <p className="mb-4 text-[13px] text-muted-foreground">
+                <ExternalLink className="mr-1 inline size-3" />
+                {"You'll be redirected to "}
+                {modalInteg.name}
+                {' to authorize access. We only request the permissions listed above.'}
+              </p>
+            )}
             <Button
               size="lg"
               className="w-full"
-              onClick={() => toggleConnect(modalInteg.slug)}
+              onClick={() => handleConnect(modalInteg)}
               disabled={isPending}
             >
               <Zap className="mr-2 size-4" />
-              Connect {modalInteg.name}
+              {modalInteg.authType === 'oauth'
+                ? `Connect to ${modalInteg.name}`
+                : `Connect ${modalInteg.name}`}
             </Button>
             <p className="mt-3 text-center text-xs text-muted-foreground">
               You can disconnect anytime from Settings. Your data stays safe.

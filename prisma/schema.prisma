@@ -79,18 +79,39 @@ model Integration {
   icon             String
   description      String
   popular          Boolean           @default(false)
+  authType         String            @default("toggle")
   userIntegrations UserIntegration[]
 }
 
 model UserIntegration {
-  id            String      @id @default(cuid())
-  userId        String
-  integrationId String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  createdAt     DateTime    @default(now())
+  id                String             @id @default(cuid())
+  userId            String
+  integrationId     String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  integration       Integration        @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  createdAt         DateTime           @default(now())
+  slackInstallation SlackInstallation?
 
   @@unique([userId, integrationId])
+}
+
+model SlackInstallation {
+  id                String          @id @default(cuid())
+  userIntegrationId String          @unique
+  userIntegration   UserIntegration @relation(fields: [userIntegrationId], references: [id], onDelete: Cascade)
+  botToken          String
+  botUserId         String
+  teamId            String
+  teamName          String
+  appId             String
+  installerUserId   String
+  scopes            String
+  tokenType         String          @default("bot")
+  isEnterprise      Boolean         @default(false)
+  enterpriseId      String?
+  enterpriseName    String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 }
 
 model Approval {

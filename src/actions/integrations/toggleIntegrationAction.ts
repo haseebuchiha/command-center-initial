@@ -25,6 +25,10 @@ export const toggleIntegrationAction = authActionClient
     if (existing) {
       await prisma.userIntegration.delete({ where: { id: existing.id } });
     } else {
+      if (integration.authType === 'oauth') {
+        throw new Error('This integration requires OAuth authorization');
+      }
+
       await prisma.userIntegration.create({
         data: {
           userId: ctx.user.id,

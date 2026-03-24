@@ -9,19 +9,27 @@ export const IntegrationsController = async () => {
     orderBy: { name: 'asc' },
   });
 
-  const connectedSlugs = user
-    ? (
-        await prisma.userIntegration.findMany({
-          where: { userId: user.id },
-          include: { integration: true },
-        })
-      ).map((ui) => ui.integration.slug)
+  const connectedIntegrations = user
+    ? await prisma.userIntegration.findMany({
+        where: { userId: user.id },
+        include: {
+          integration: true,
+          slackInstallation: {
+            select: { teamName: true },
+          },
+        },
+      })
     : [];
+
+  const connectedInfo = connectedIntegrations.map((ui) => ({
+    slug: ui.integration.slug,
+    teamName: ui.slackInstallation?.teamName ?? null,
+  }));
 
   return (
     <Integrations
       integrations={allIntegrations}
-      connectedSlugs={connectedSlugs}
+      connectedInfo={connectedInfo}
     />
   );
 };

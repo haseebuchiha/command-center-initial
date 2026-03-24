@@ -19,4 +19,5 @@ export const routes = {
   daily: '/daily-brief',
   onboarding: '/onboarding',
   settings: '/settings',
+  'slack.oauth.start': '/slack/oauth/start',
 };
