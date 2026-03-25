@@ -1152,4 +1152,71 @@ Use Vercel's blob storage for file uploads. See `src/components/FileUploadField.
 
 ---
 
+## Pipeline API (CrewAI Integration)
+
+The dashboard receives real-time data from the CrewAI pipeline (`launchbased-app`) via REST API endpoints. The pipeline POSTs lifecycle events as agents work.
+
+### Architecture
+
+```
+CrewAI Pipeline (VPS) --POST--> /api/pipeline/* (Vercel) --> Prisma/Neon DB --> Dashboard auto-refreshes
+```
+
+### API Endpoints
+
+All endpoints require `Authorization: Bearer <PIPELINE_API_KEY>` header. Auth logic is in `src/lib/apiAuth.ts` (timing-safe comparison against env var).
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/pipeline/runs` | Create/update pipeline runs (research or build phase) |
+| `POST /api/pipeline/activity` | Log agent activity events (also auto-creates Agent rows) |
+| `POST /api/pipeline/usage` | Log token consumption per agent |
+| `POST /api/pipeline/builds` | Log build/deploy results (URL, errors, duration) |
+| `POST /api/pipeline/approvals` | Create approval requests for human sign-off |
+
+Route handlers: `src/app/api/pipeline/*/route.ts`
+Validators: `src/validators/pipeline/*.ts`
+Agent upsert helper: `src/lib/findOrCreateAgent.ts`
+
+### Pipeline-Specific Models
+
+| Model | Purpose |
+|-------|---------|
+| `PipelineRun` | Tracks a single research or build invocation |
+| `ActivityEvent` | Agent activity feed events (replaces mock data on dashboard) |
+| `Build` | Deployment results (live URL, error logs, duration) |
+
+### Dashboard Data Flow
+
+Controllers fetch real data from DB and pass as props to views. Views fall back to hardcoded mock data (in `src/lib/data/`) when no real data exists. The dashboard polls via `router.refresh()` every 5 seconds for near-real-time updates.
+
+Token usage aggregation helper: `src/lib/buildTokenUsageSummary.ts`
+
+### Environment Variables
+
+```
+PIPELINE_API_KEY=<64-char-hex>   # Shared secret for API auth
+PIPELINE_USER_ID=<cuid>          # User ID that owns pipeline agents
+```
+
+### Important: No root `app/` directory
+
+**Never create an `app/` directory at the project root.** Next.js 16 will use it as the App Router directory instead of `src/app/`, causing all routes to 404. All app routes must live in `src/app/`.
+
+---
+
+## Deployment
+
+- **Platform**: Vercel (auto-deploys from `haseebuchiha/launchbased-command-center` GitHub repo)
+- **Database**: Neon PostgreSQL
+- **Build command**: `prisma generate && prisma migrate deploy && next build`
+- **Migrations run automatically** on every Vercel deploy
+- **Two git remotes**:
+  - `origin`: `git@github.com:LaunchBased-Now/launchbased-command-center.git`
+  - `vercel`: `git@github.com:haseebuchiha/launchbased-command-center.git` (connected to Vercel)
+- **Push to both** when deploying: `git push origin main && git push vercel main`
+- **Production URL**: https://command-center-initial.vercel.app
+
+---
+
 Remember to think through your implementation carefully before writing any code. Consider the trade-offs between different approaches and choose the one that best aligns with the project's principles and conventions.
