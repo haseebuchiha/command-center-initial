@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { VideoTip } from '@/components/app/VideoTip';
+import { Agent } from '@/generated/prisma/client';
 
 type AgentData = {
   name: string;
@@ -28,7 +29,7 @@ type TableGroup = {
   agents: AgentData[];
 };
 
-const agents: AgentData[] = [
+const defaultAgents: AgentData[] = [
   {
     name: 'Emma',
     role: 'Content Writer',
@@ -106,31 +107,52 @@ function getStatusLabel(status: AgentData['status']) {
   }
 }
 
-const tables: TableGroup[] = [
-  {
-    label: 'Working',
-    emoji: '\u26A1',
-    colorClass: 'text-primary',
-    bgClass: 'bg-primary',
-    agents: agents.filter((a) => a.status === 'working'),
-  },
-  {
-    label: 'Needs Approval',
-    emoji: '\u23F3',
-    colorClass: 'text-warning',
-    bgClass: 'bg-warning',
-    agents: agents.filter((a) => a.status === 'approval'),
-  },
-  {
-    label: 'Idle (Available)',
-    emoji: '\u{1F4A4}',
-    colorClass: 'text-muted-foreground',
-    bgClass: 'bg-muted-foreground',
-    agents: agents.filter((a) => a.status === 'idle'),
-  },
-];
+function buildTables(agentList: AgentData[]): TableGroup[] {
+  return [
+    {
+      label: 'Working',
+      emoji: '\u26A1',
+      colorClass: 'text-primary',
+      bgClass: 'bg-primary',
+      agents: agentList.filter((a) => a.status === 'working'),
+    },
+    {
+      label: 'Needs Approval',
+      emoji: '\u23F3',
+      colorClass: 'text-warning',
+      bgClass: 'bg-warning',
+      agents: agentList.filter((a) => a.status === 'approval'),
+    },
+    {
+      label: 'Idle (Available)',
+      emoji: '\u{1F4A4}',
+      colorClass: 'text-muted-foreground',
+      bgClass: 'bg-muted-foreground',
+      agents: agentList.filter((a) => a.status === 'idle'),
+    },
+  ];
+}
 
-export const AgentOffice = () => (
+type AgentOfficeProps = {
+  agents?: Agent[];
+};
+
+export const AgentOffice = ({ agents }: AgentOfficeProps) => {
+  const agentList: AgentData[] =
+    agents && agents.length > 0
+      ? agents.map((a) => ({
+          name: a.name,
+          role: a.role,
+          emoji: a.emoji,
+          status: a.status as AgentData['status'],
+          task: a.task,
+          progress: a.progress,
+        }))
+      : defaultAgents;
+
+  const tables = buildTables(agentList);
+
+  return (
   <div>
     <div className="mb-7">
       <h1 className="flex items-center gap-2 text-[28px] font-extrabold">
@@ -228,4 +250,5 @@ export const AgentOffice = () => (
       </div>
     ))}
   </div>
-);
+  );
+};

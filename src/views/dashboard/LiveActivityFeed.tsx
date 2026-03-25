@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { activityFeedData } from '@/lib/data/activity-feed';
-import type { CompletedFeedItem } from '@/types/command-center';
+import { ActivityEvent } from '@/generated/prisma/client';
+import type { ActivityFeedItem, CompletedFeedItem } from '@/types/command-center';
 
 const workingAgentEmojis = [
   { name: 'Emma', emoji: '✍️' },
@@ -21,15 +22,32 @@ const workingAgentEmojis = [
   { name: 'Ethan', emoji: '📊' },
 ];
 
-export const LiveActivityFeed = () => {
+type LiveActivityFeedProps = {
+  recentEvents?: ActivityEvent[];
+};
+
+export const LiveActivityFeed = ({ recentEvents }: LiveActivityFeedProps) => {
+  const feedData: ActivityFeedItem[] = useMemo(
+    () =>
+      recentEvents && recentEvents.length > 0
+        ? recentEvents.map((e) => ({
+            agent: e.agentName,
+            emoji: e.agentEmoji,
+            action: e.action,
+            color: e.color,
+            streamText: e.detail || e.label,
+            label: e.label,
+          }))
+        : activityFeedData,
+    [recentEvents]
+  );
   const [feedItems, setFeedItems] = useState<CompletedFeedItem[]>([]);
   const [streamingIdx, setStreamingIdx] = useState(0);
   const [streamedChars, setStreamedChars] = useState(0);
   const [feedPaused, setFeedPaused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const currentItem =
-    activityFeedData[streamingIdx % activityFeedData.length];
+  const currentItem = feedData[streamingIdx % feedData.length];
   const currentText = currentItem.streamText.substring(0, streamedChars);
 
   // Auto-scroll

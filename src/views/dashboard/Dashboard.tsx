@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Tooltip,
@@ -11,6 +12,8 @@ import { Info } from 'lucide-react';
 import { NextActionCard } from '@/components/app/NextActionCard';
 import { NudgeBanner } from '@/components/app/NudgeBanner';
 import { useCommandCenterStore } from '@/lib/stores/command-center-store';
+import { Agent, ActivityEvent, Prisma } from '@/generated/prisma/client';
+import { TokenUsageSummary } from '@/types/command-center';
 import { StatsGrid } from './StatsGrid';
 import { TokenUsageCard } from './TokenUsageCard';
 import { LiveActivityFeed } from './LiveActivityFeed';
@@ -18,10 +21,39 @@ import { WorkingAgentsCard } from './WorkingAgentsCard';
 import { PendingApprovalsCard } from './PendingApprovalsCard';
 import { WeeklyActivityChart } from './WeeklyActivityChart';
 
-export const Dashboard = () => {
+type ApprovalWithAgent = Prisma.ApprovalGetPayload<{
+  include: { agent: true };
+}>;
+
+type DashboardProps = {
+  stats?: {
+    activeAgents: number;
+    pendingApprovals: number;
+    tasksDoneToday: number;
+  };
+  tokenUsage?: TokenUsageSummary | null;
+  recentActivity?: ActivityEvent[];
+  workingAgents?: Agent[];
+  pendingApprovals?: ApprovalWithAgent[];
+};
+
+export const Dashboard = ({
+  stats,
+  tokenUsage,
+  recentActivity,
+  workingAgents,
+  pendingApprovals,
+}: DashboardProps) => {
   const router = useRouter();
   const dismissedNudges = useCommandCenterStore((s) => s.dismissedNudges);
   const dismissNudge = useCommandCenterStore((s) => s.dismissNudge);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   return (
     <div>
@@ -59,13 +91,13 @@ export const Dashboard = () => {
         />
       )}
 
-      <StatsGrid />
-      <TokenUsageCard />
-      <LiveActivityFeed />
+      <StatsGrid stats={stats} />
+      <TokenUsageCard usage={tokenUsage ?? undefined} />
+      <LiveActivityFeed recentEvents={recentActivity} />
 
       <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <WorkingAgentsCard />
-        <PendingApprovalsCard />
+        <WorkingAgentsCard agents={workingAgents} />
+        <PendingApprovalsCard approvals={pendingApprovals} />
       </div>
 
       <WeeklyActivityChart />

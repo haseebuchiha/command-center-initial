@@ -32,6 +32,9 @@ model User {
   onboardSteps     OnboardStep[]
   tokenUsages      TokenUsage[]
   dailyBriefs      DailyBrief[]
+  pipelineRuns     PipelineRun[]
+  activityEvents   ActivityEvent[]
+  builds           Build[]
 }
 
 model Session {
@@ -69,6 +72,8 @@ model Agent {
   tokenUsages TokenUsage[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@unique([userId, name])
 }
 
 model Integration {
@@ -115,17 +120,18 @@ model SlackInstallation {
 }
 
 model Approval {
-  id        String   @id @default(cuid())
-  agentId   String
-  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  type      String
-  title     String
-  preview   String
-  status    String   @default("pending")
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  agentId       String
+  agent         Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type          String
+  title         String
+  preview       String
+  status        String   @default("pending")
+  pipelineRunId String?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Document {
@@ -152,14 +158,17 @@ model OnboardStep {
 }
 
 model TokenUsage {
-  id        String   @id @default(cuid())
-  agentId   String
-  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  tokens    Int
-  date      DateTime @db.Date
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  agentId       String
+  agent         Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tokens        Int
+  date          DateTime @db.Date
+  model         String?
+  costCents     Int      @default(0)
+  pipelineRunId String?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
 }
 
 model DailyBrief {
@@ -192,4 +201,55 @@ model OrderSubmission {
   inspireUrls   String[]
   colors        String?
   createdAt     DateTime @default(now())
+}
+
+model PipelineRun {
+  id             String          @id @default(cuid())
+  projectName    String
+  phase          String
+  status         String          @default("running")
+  startedAt      DateTime        @default(now())
+  completedAt    DateTime?
+  tokenTotal     Int             @default(0)
+  costCents      Int             @default(0)
+  errorMessage   String?
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityEvents ActivityEvent[]
+  build          Build?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model ActivityEvent {
+  id            String       @id @default(cuid())
+  agentName     String
+  agentEmoji    String
+  action        String
+  label         String
+  detail        String?
+  color         String       @default("#3B82F6")
+  pipelineRunId String?
+  pipelineRun   PipelineRun? @relation(fields: [pipelineRunId], references: [id], onDelete: SetNull)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+}
+
+model Build {
+  id            String      @id @default(cuid())
+  pipelineRunId String      @unique
+  pipelineRun   PipelineRun @relation(fields: [pipelineRunId], references: [id], onDelete: Cascade)
+  projectName   String
+  liveUrl       String?
+  status        String      @default("pending")
+  platform      String      @default("vercel")
+  neonProjectId String?
+  durationMs    Int?
+  errorLog      String?
+  fileCount     Int?
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }

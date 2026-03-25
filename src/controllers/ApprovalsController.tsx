@@ -1,6 +1,17 @@
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { UserAuth } from '@/services/UserAuth';
 import { Approvals } from '@/views/approvals/Approvals';
 
 export const ApprovalsController = async () => {
-  // In future, fetch real approvals from DB
-  return <Approvals />;
+  const user = await UserAuth.getUser();
+  if (!user) redirect('/login');
+
+  const approvals = await prisma.approval.findMany({
+    where: { userId: user.id },
+    include: { agent: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return <Approvals approvals={approvals} />;
 };

@@ -8,15 +8,19 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import { tokenUsage } from '@/lib/data/token-usage';
+import { tokenUsage as defaultTokenUsage } from '@/lib/data/token-usage';
+import { TokenUsageSummary } from '@/types/command-center';
 
-export const TokenUsageCard = () => {
-  const usagePercent = Math.round(
-    (tokenUsage.used / tokenUsage.monthlyLimit) * 100
-  );
-  const remaining = tokenUsage.monthlyLimit - tokenUsage.used;
-  const maxAgentTokens = tokenUsage.byAgent[0].tokens;
-  const daysAtPace = Math.round(remaining / (tokenUsage.used / 14));
+type TokenUsageCardProps = {
+  usage?: TokenUsageSummary;
+};
+
+export const TokenUsageCard = ({ usage }: TokenUsageCardProps) => {
+  const data = usage || defaultTokenUsage;
+  const usagePercent = Math.round((data.used / data.monthlyLimit) * 100);
+  const remaining = data.monthlyLimit - data.used;
+  const maxAgentTokens = data.byAgent[0]?.tokens || 1;
+  const daysAtPace = Math.round(remaining / (data.used / 14 || 1));
 
   return (
     <Card className="mb-6 overflow-hidden">
@@ -43,10 +47,10 @@ export const TokenUsageCard = () => {
             variant="outline"
             className="border-primary/30 text-primary"
           >
-            {tokenUsage.plan} Plan
+            {data.plan} Plan
           </Badge>
           <span className="text-xs text-muted-foreground">
-            Resets {tokenUsage.resetDate}
+            Resets {data.resetDate}
           </span>
         </div>
       </div>
@@ -57,10 +61,10 @@ export const TokenUsageCard = () => {
           <div className="mb-2 flex items-baseline justify-between">
             <div>
               <span className="text-3xl font-extrabold md:text-4xl">
-                {(tokenUsage.used / 1000).toFixed(0)}K
+                {(data.used / 1000).toFixed(0)}K
               </span>
               <span className="ml-1 text-sm text-muted-foreground">
-                / {(tokenUsage.monthlyLimit / 1000).toFixed(0)}K tokens
+                / {(data.monthlyLimit / 1000).toFixed(0)}K tokens
               </span>
             </div>
             <span
@@ -99,7 +103,7 @@ export const TokenUsageCard = () => {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {tokenUsage.byAgent.map((a) => (
+            {data.byAgent.map((a) => (
               <div key={a.name} className="mb-2">
                 <div className="mb-0.5 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -140,7 +144,7 @@ export const TokenUsageCard = () => {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <DailyUsageBars />
+            <DailyUsageBars daily={data.daily} />
           </div>
         </div>
 
@@ -158,13 +162,17 @@ export const TokenUsageCard = () => {
   );
 };
 
-const DailyUsageBars = () => {
-  const maxTokens = Math.max(...tokenUsage.daily.map((x) => x.tokens));
+const DailyUsageBars = ({
+  daily,
+}: {
+  daily: { day: string; tokens: number }[];
+}) => {
+  const maxTokens = Math.max(...daily.map((x) => x.tokens), 1);
   const today = new Date().getDay() - 1;
 
   return (
     <div className="flex h-[120px] items-end gap-1 px-1 md:gap-2">
-      {tokenUsage.daily.map((d, i) => {
+      {daily.map((d, i) => {
         const barHeight = (d.tokens / maxTokens) * 100;
         const isToday = i === today;
         return (

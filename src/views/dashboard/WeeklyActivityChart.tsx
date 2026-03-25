@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { chartData } from '@/lib/data/charts';
+import { ChartDataPoint } from '@/types/command-center';
 
 const legends = [
   { label: 'Leads', colorClass: 'bg-primary' },
@@ -17,12 +18,19 @@ const legends = [
   { label: 'Sales', colorClass: 'bg-success' },
 ];
 
-export const WeeklyActivityChart = () => (
+type WeeklyActivityChartProps = {
+  data?: ChartDataPoint[];
+};
+
+export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
+  const displayData = data && data.length > 0 ? data : chartData;
+
+  return (
   <Card>
     <CardContent className="p-6">
       <h3 className="mb-5 text-lg font-bold">This Week&apos;s Activity</h3>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={chartData}>
+        <BarChart data={displayData}>
           <XAxis
             dataKey="name"
             tick={{ fontSize: 12 }}
@@ -61,4 +69,5 @@ export const WeeklyActivityChart = () => (
       </div>
     </CardContent>
   </Card>
-);
+  );
+};

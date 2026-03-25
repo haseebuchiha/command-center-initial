@@ -13,11 +13,12 @@ import {
 import { Info } from 'lucide-react';
 import { VideoTip } from '@/components/app/VideoTip';
 import { useCommandCenterStore } from '@/lib/stores/command-center-store';
+import { Prisma } from '@/generated/prisma/client';
 
 type ApprovalStatus = 'pending' | 'approved' | 'revised' | 'blocked';
 
 type ApprovalItem = {
-  id: number;
+  id: number | string;
   agent: string;
   emoji: string;
   type: string;
@@ -26,7 +27,15 @@ type ApprovalItem = {
   status: ApprovalStatus;
 };
 
-const initialItems: ApprovalItem[] = [
+type ApprovalWithAgent = Prisma.ApprovalGetPayload<{
+  include: { agent: true };
+}>;
+
+type ApprovalsProps = {
+  approvals?: ApprovalWithAgent[];
+};
+
+const defaultItems: ApprovalItem[] = [
   {
     id: 1,
     agent: 'Olivia',
@@ -89,11 +98,24 @@ function getStatusBadge(status: ApprovalStatus) {
   }
 }
 
-export const Approvals = () => {
+export const Approvals = ({ approvals }: ApprovalsProps) => {
+  const initialItems: ApprovalItem[] =
+    approvals && approvals.length > 0
+      ? approvals.map((a) => ({
+          id: a.id,
+          agent: a.agent.name,
+          emoji: a.agent.emoji,
+          type: a.type,
+          title: a.title,
+          preview: a.preview,
+          status: a.status as ApprovalStatus,
+        }))
+      : defaultItems;
+
   const [items, setItems] = useState(initialItems);
   const triggerConfetti = useCommandCenterStore((s) => s.triggerConfetti);
 
-  const handleAction = (id: number, action: ApprovalStatus) => {
+  const handleAction = (id: number | string, action: ApprovalStatus) => {
     setItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, status: action } : item

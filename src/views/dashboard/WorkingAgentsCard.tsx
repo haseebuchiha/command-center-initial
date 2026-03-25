@@ -7,8 +7,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
+import { Agent } from '@/generated/prisma/client';
 
-const workingAgents = [
+const defaultWorkingAgents = [
   {
     name: 'Emma',
     emoji: '✍️',
@@ -39,7 +40,23 @@ const workingAgents = [
   },
 ];
 
-export const WorkingAgentsCard = () => (
+type WorkingAgentsCardProps = {
+  agents?: Agent[];
+};
+
+export const WorkingAgentsCard = ({ agents }: WorkingAgentsCardProps) => {
+  const displayAgents =
+    agents && agents.length > 0
+      ? agents.map((a) => ({
+          name: a.name,
+          emoji: a.emoji,
+          role: a.role,
+          task: a.task || 'Working...',
+          progress: a.progress,
+        }))
+      : defaultWorkingAgents;
+
+  return (
   <Card>
     <CardContent className="p-6">
       <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
@@ -57,7 +74,7 @@ export const WorkingAgentsCard = () => (
           </Tooltip>
         </TooltipProvider>
       </h3>
-      {workingAgents.map((a) => (
+      {displayAgents.map((a) => (
         <div key={a.name} className="mb-4 rounded-lg border bg-background p-3">
           <div className="mb-2 flex items-center justify-between">
             <span className="font-semibold">
@@ -78,4 +95,5 @@ export const WorkingAgentsCard = () => (
       ))}
     </CardContent>
   </Card>
-);
+  );
+};
