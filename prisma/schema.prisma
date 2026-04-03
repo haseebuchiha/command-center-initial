@@ -38,6 +38,7 @@ model User {
   customers        Customer[]
   supportTickets   SupportTicket[]
   campaigns        Campaign[]
+  leads            Lead[]
 }
 
 model Session {
@@ -268,6 +269,7 @@ model Customer {
   notes     String?
   status    String          @default("active")
   tickets   SupportTicket[]
+  leads     Lead[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
@@ -314,4 +316,30 @@ model Campaign {
 
   @@index([userId])
   @@index([status])
+}
+
+model Lead {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  serviceType    String?
+  source         String    @default("other")
+  stage          String    @default("new")
+  estimatedValue Int?
+  followUpDate   DateTime?
+  followUpNotes  String?
+  notes          String?
+  customerId     String?
+  customer       Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdBy      String    @default("manual")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([stage])
+  @@index([source])
 }

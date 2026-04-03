@@ -14,6 +14,7 @@ export const routes = {
   approvals: '/approvals',
   tickets: '/tickets',
   campaigns: '/campaigns',
+  leads: '/leads',
   integrations: '/integrations',
   website: '/website',
   docs: '/documents',
