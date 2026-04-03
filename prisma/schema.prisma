@@ -35,6 +35,8 @@ model User {
   pipelineRuns     PipelineRun[]
   activityEvents   ActivityEvent[]
   builds           Build[]
+  customers        Customer[]
+  supportTickets   SupportTicket[]
 }
 
 model Session {
@@ -252,4 +254,41 @@ model Build {
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+}
+
+model Customer {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  notes     String?
+  status    String          @default("active")
+  tickets   SupportTicket[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  description String
+  status      String   @default("open")
+  priority    String   @default("medium")
+  createdBy   String   @default("manual")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
 }

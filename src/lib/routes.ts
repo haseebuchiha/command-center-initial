@@ -12,6 +12,7 @@ export const routes = {
   dashboard: '/dashboard',
   agents: '/agents',
   approvals: '/approvals',
+  tickets: '/tickets',
   integrations: '/integrations',
   website: '/website',
   docs: '/documents',

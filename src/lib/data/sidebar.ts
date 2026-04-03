@@ -4,6 +4,7 @@ export const sidebarItems: SidebarNavItem[] = [
   { id: 'dashboard', label: 'Command Center', iconName: 'Home' },
   { id: 'agents', label: 'Agent Office', iconName: 'Users' },
   { id: 'approvals', label: 'Approvals', iconName: 'CheckCircle', badge: 2 },
+  { id: 'tickets', label: 'Support Tickets', iconName: 'MessageSquare' },
   { id: 'integrations', label: 'Integrations', iconName: 'LayoutGrid' },
   { id: 'website', label: 'My Website', iconName: 'Globe' },
   { id: 'docs', label: 'Documents', iconName: 'FileText' },
