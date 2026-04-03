@@ -13,6 +13,7 @@ export const routes = {
   agents: '/agents',
   approvals: '/approvals',
   tickets: '/tickets',
+  campaigns: '/campaigns',
   integrations: '/integrations',
   website: '/website',
   docs: '/documents',

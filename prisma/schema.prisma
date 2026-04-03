@@ -37,6 +37,7 @@ model User {
   builds           Build[]
   customers        Customer[]
   supportTickets   SupportTicket[]
+  campaigns        Campaign[]
 }
 
 model Session {
@@ -290,5 +291,27 @@ model SupportTicket {
 
   @@index([userId])
   @@index([customerId])
+  @@index([status])
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  type        String    @default("content")
+  status      String    @default("draft")
+  channels    String?
+  messaging   String?
+  targetArea  String?
+  startDate   DateTime?
+  endDate     DateTime?
+  notes       String?
+  createdBy   String    @default("manual")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
   @@index([status])
 }
