@@ -19,13 +19,28 @@ export async function authenticateApiRequest(
   }
 
   const token = authHeader.slice(7);
+
+  // Strategy 1: Per-workspace API key lookup in database
+  const installation = await prisma.slackInstallation.findUnique({
+    where: { pipelineApiKey: token },
+    include: {
+      userIntegration: {
+        include: { user: true },
+      },
+    },
+  });
+
+  if (installation?.userIntegration?.user) {
+    return { user: installation.userIntegration.user };
+  }
+
+  // Strategy 2: Fallback to env var (backward compat / local dev)
   const expectedKey = process.env.PIPELINE_API_KEY;
-  if (!expectedKey) {
+  const userId = process.env.PIPELINE_USER_ID;
+
+  if (!expectedKey || !userId) {
     return {
-      error: NextResponse.json(
-        { error: 'Server misconfigured' },
-        { status: 500 }
-      ),
+      error: NextResponse.json({ error: 'Invalid API key' }, { status: 401 }),
     };
   }
 
@@ -37,16 +52,6 @@ export async function authenticateApiRequest(
   ) {
     return {
       error: NextResponse.json({ error: 'Invalid API key' }, { status: 401 }),
-    };
-  }
-
-  const userId = process.env.PIPELINE_USER_ID;
-  if (!userId) {
-    return {
-      error: NextResponse.json(
-        { error: 'Server misconfigured' },
-        { status: 500 }
-      ),
     };
   }
 

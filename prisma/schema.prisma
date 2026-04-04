@@ -119,6 +119,7 @@ model SlackInstallation {
   isEnterprise      Boolean         @default(false)
   enterpriseId      String?
   enterpriseName    String?
+  pipelineApiKey    String?         @unique
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 }

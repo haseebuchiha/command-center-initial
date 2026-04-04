@@ -1159,12 +1159,17 @@ The dashboard receives real-time data from the CrewAI pipeline (`launchbased-app
 ### Architecture
 
 ```
-CrewAI Pipeline (VPS) --POST--> /api/pipeline/* (Vercel) --> Prisma/Neon DB --> Dashboard auto-refreshes
+CrewAI Pipeline (VPS) --POST--> /api/pipeline/* or /api/crm/* (Vercel) --> apiAuth.ts (per-workspace key lookup) --> Prisma/Neon DB
 ```
 
 ### API Endpoints
 
-All endpoints require `Authorization: Bearer <PIPELINE_API_KEY>` header. Auth logic is in `src/lib/apiAuth.ts` (timing-safe comparison against env var).
+All endpoints require `Authorization: Bearer <API_KEY>` header. Auth logic is in `src/lib/apiAuth.ts` using a two-strategy approach:
+
+1. **Per-workspace key** (production): Looks up the Bearer token in `SlackInstallation.pipelineApiKey` → resolves to the correct user via `SlackInstallation → UserIntegration → User`
+2. **Env var fallback** (local dev / backward compat): Compares against `PIPELINE_API_KEY` env var, resolves to `PIPELINE_USER_ID`
+
+Strategy 1 takes precedence. This enables multi-tenant data isolation — each Slack workspace's API key routes to the correct Command Center user.
 
 | Endpoint | Purpose |
 |----------|---------|
@@ -1195,9 +1200,46 @@ Token usage aggregation helper: `src/lib/buildTokenUsageSummary.ts`
 ### Environment Variables
 
 ```
-PIPELINE_API_KEY=<64-char-hex>   # Shared secret for API auth
-PIPELINE_USER_ID=<cuid>          # User ID that owns pipeline agents
+PIPELINE_API_KEY=<64-char-hex>   # Fallback API key (local dev only — production uses per-workspace keys)
+PIPELINE_USER_ID=<cuid>          # Fallback user ID (local dev only — production resolves from API key)
 ```
+
+### Multi-Tenancy
+
+Each Slack workspace gets a unique `pipelineApiKey` (64-char hex) auto-generated during OAuth and stored in `SlackInstallation`. This key determines which user owns all data created through the pipeline.
+
+**How it works:**
+- Pipeline/CRM API calls include `Authorization: Bearer <workspace-key>`
+- `apiAuth.ts` looks up the key in `SlackInstallation.pipelineApiKey` (unique index)
+- Resolves to the correct user via `SlackInstallation → UserIntegration → User`
+- All Prisma queries scope data to `where: { userId: user.id }` — isolation is automatic
+
+**Key management:**
+- Keys are visible on the Integrations page (reveal/copy/regenerate)
+- Re-authorizing a workspace preserves the existing key
+- Regenerating a key immediately invalidates the old one
+
+**OpenClaw setup per workspace:**
+- One OpenClaw agent per client workspace
+- Binding: `{ match: { channel: "slack", teamId: "T_CLIENT_X" }, agentId: "client-x" }`
+- Per-agent env: `DASHBOARD_API_KEY=<workspace-specific-key>`
+
+### CRM Endpoints
+
+The business agents (Support, Sales, Marketing, Customer Success) read and write CRM data via these endpoints. Same auth as pipeline endpoints.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET/POST /api/crm/customers` | Customer search + creation |
+| `GET/POST /api/crm/tickets` | Support ticket search/filter + creation |
+| `PATCH /api/crm/tickets/[id]` | Update ticket status/priority |
+| `GET/POST /api/crm/leads` | Sales lead search/filter + creation |
+| `PATCH /api/crm/leads/[id]` | Update lead stage/value |
+| `GET/POST /api/crm/campaigns` | Campaign search/filter + creation |
+| `PATCH /api/crm/campaigns/[id]` | Update campaign status |
+
+Route handlers: `src/app/api/crm/*/route.ts`
+Validators: `src/validators/crm/*.ts`
 
 ### Important: No root `app/` directory
 

@@ -15,7 +15,7 @@ export const IntegrationsController = async () => {
         include: {
           integration: true,
           slackInstallation: {
-            select: { teamName: true },
+            select: { teamName: true, pipelineApiKey: true },
           },
         },
       })
@@ -24,6 +24,7 @@ export const IntegrationsController = async () => {
   const connectedInfo = connectedIntegrations.map((ui) => ({
     slug: ui.integration.slug,
     teamName: ui.slackInstallation?.teamName ?? null,
+    pipelineApiKey: ui.slackInstallation?.pipelineApiKey ?? null,
   }));
 
   return (

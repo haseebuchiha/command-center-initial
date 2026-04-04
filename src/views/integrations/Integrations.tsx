@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,11 +10,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Info, X, Zap, Search, ExternalLink } from 'lucide-react';
+import { Info, X, Zap, Search, ExternalLink, Copy } from 'lucide-react';
 import { VideoTip } from '@/components/app/VideoTip';
 import { intCategories } from '@/lib/data/integration-categories';
 import { useAction } from 'next-safe-action/hooks';
 import { toggleIntegrationAction } from '@/actions/integrations/toggleIntegrationAction';
+import { regenerateApiKeyAction } from '@/actions/integrations/regenerateApiKeyAction';
 import { toast } from 'sonner';
 import { route } from '@/lib/route';
 import type { Integration } from '@/generated/prisma/client';
@@ -22,6 +23,7 @@ import type { Integration } from '@/generated/prisma/client';
 type ConnectedInfo = {
   slug: string;
   teamName?: string | null;
+  pipelineApiKey?: string | null;
 };
 
 const categoryCapabilities: Record<string, string> = {
@@ -42,6 +44,71 @@ const categoryCapabilities: Record<string, string> = {
     'Track website traffic, user behavior, conversions, and generate easy-to-read performance dashboards.',
   suppliers:
     'Browse supplier catalogs, import products to your store, track orders, and sync inventory levels.',
+};
+
+const ApiKeyDisplay = ({
+  apiKey,
+  integrationSlug,
+}: {
+  apiKey: string;
+  integrationSlug: string;
+}) => {
+  const [revealed, setRevealed] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const copyKey = () => {
+    navigator.clipboard.writeText(apiKey);
+    toast.success('API key copied to clipboard');
+  };
+
+  const handleRegenerate = () => {
+    if (
+      !confirm(
+        'Regenerate this API key? The old key will stop working immediately. You will need to update the OpenClaw agent config.'
+      )
+    )
+      return;
+    startTransition(async () => {
+      await regenerateApiKeyAction({ integrationSlug });
+      toast.success('API key regenerated');
+    });
+  };
+
+  return (
+    <div className="mt-3 rounded-lg border bg-background p-3">
+      <div className="mb-1 text-xs font-semibold text-foreground">
+        Pipeline API Key
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+          {revealed ? apiKey : `${apiKey.slice(0, 8)}${'*'.repeat(24)}`}
+        </code>
+        <button
+          onClick={() => setRevealed(!revealed)}
+          className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {revealed ? 'Hide' : 'Reveal'}
+        </button>
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <Button size="sm" variant="outline" onClick={copyKey}>
+          <Copy className="mr-1 h-3 w-3" />
+          Copy
+        </Button>
+        <button
+          onClick={handleRegenerate}
+          disabled={isPending}
+          className="text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+        >
+          {isPending ? 'Regenerating...' : 'Regenerate'}
+        </button>
+      </div>
+      <p className="mt-2 text-[10px] text-muted-foreground">
+        Use this key as DASHBOARD_API_KEY in the OpenClaw agent config for this
+        workspace.
+      </p>
+    </div>
+  );
 };
 
 export const Integrations = ({
@@ -132,6 +199,9 @@ export const Integrations = ({
 
   const getTeamName = (slug: string) =>
     connectedInfo.find((c) => c.slug === slug)?.teamName;
+
+  const getPipelineApiKey = (slug: string) =>
+    connectedInfo.find((c) => c.slug === slug)?.pipelineApiKey;
 
   return (
     <div>
@@ -263,6 +333,14 @@ export const Integrations = ({
                       <div className="text-xs leading-relaxed text-muted-foreground">
                         {integ.description}
                       </div>
+                      {isConn &&
+                        integ.authType === 'oauth' &&
+                        getPipelineApiKey(integ.slug) && (
+                          <ApiKeyDisplay
+                            apiKey={getPipelineApiKey(integ.slug)!}
+                            integrationSlug={integ.slug}
+                          />
+                        )}
                     </CardContent>
                   </Card>
                 );
@@ -299,58 +377,68 @@ export const Integrations = ({
             const teamName = getTeamName(integ.slug);
             return (
               <Card key={integ.slug}>
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-lg border text-2xl ${
-                      isConn ? 'border-success/20 bg-success/5' : 'bg-primary/5'
-                    }`}
-                  >
-                    {integ.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-0.5 flex items-center gap-2">
-                      <span className="text-sm font-bold">{integ.name}</span>
-                      {integ.popular && (
-                        <span className="rounded bg-warning/15 px-1.5 py-px text-[10px] font-semibold text-warning">
-                          POPULAR
-                        </span>
-                      )}
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex size-11 shrink-0 items-center justify-center rounded-lg border text-2xl ${
+                        isConn ? 'border-success/20 bg-success/5' : 'bg-primary/5'
+                      }`}
+                    >
+                      {integ.icon}
                     </div>
-                    <div className="text-xs leading-relaxed text-muted-foreground">
-                      {integ.description}
-                    </div>
-                  </div>
-                  <div className="ml-2 shrink-0">
-                    {isConn ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <Badge
-                          variant="outline"
-                          className="border-success/30 text-success"
-                        >
-                          Connected
-                        </Badge>
-                        {teamName && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {teamName}
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex items-center gap-2">
+                        <span className="text-sm font-bold">{integ.name}</span>
+                        {integ.popular && (
+                          <span className="rounded bg-warning/15 px-1.5 py-px text-[10px] font-semibold text-warning">
+                            POPULAR
                           </span>
                         )}
-                        <button
-                          onClick={() => handleDisconnect(integ)}
-                          className="text-[11px] text-destructive"
-                          disabled={isPending}
-                        >
-                          Disconnect
-                        </button>
                       </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => setModalSlug(integ.slug)}
-                      >
-                        + Add
-                      </Button>
-                    )}
+                      <div className="text-xs leading-relaxed text-muted-foreground">
+                        {integ.description}
+                      </div>
+                    </div>
+                    <div className="ml-2 shrink-0">
+                      {isConn ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <Badge
+                            variant="outline"
+                            className="border-success/30 text-success"
+                          >
+                            Connected
+                          </Badge>
+                          {teamName && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {teamName}
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handleDisconnect(integ)}
+                            className="text-[11px] text-destructive"
+                            disabled={isPending}
+                          >
+                            Disconnect
+                          </button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => setModalSlug(integ.slug)}
+                        >
+                          + Add
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                  {isConn &&
+                    integ.authType === 'oauth' &&
+                    getPipelineApiKey(integ.slug) && (
+                      <ApiKeyDisplay
+                        apiKey={getPipelineApiKey(integ.slug)!}
+                        integrationSlug={integ.slug}
+                      />
+                    )}
                 </CardContent>
               </Card>
             );

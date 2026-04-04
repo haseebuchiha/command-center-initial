@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { randomBytes } from 'crypto';
 import { UserAuth } from '@/services/UserAuth';
 import { prisma } from '@/lib/prisma';
 import { encrypt } from '@/lib/encryption';
@@ -99,6 +100,14 @@ export async function GET(request: NextRequest) {
         update: {},
       });
 
+      const pipelineApiKey = randomBytes(32).toString('hex');
+
+      // Check if installation already exists to preserve existing key on re-OAuth
+      const existingInstallation = await tx.slackInstallation.findUnique({
+        where: { userIntegrationId: userIntegration.id },
+        select: { pipelineApiKey: true },
+      });
+
       await tx.slackInstallation.upsert({
         where: { userIntegrationId: userIntegration.id },
         create: {
@@ -114,6 +123,7 @@ export async function GET(request: NextRequest) {
           isEnterprise: tokenData.is_enterprise_install,
           enterpriseId: tokenData.enterprise?.id ?? null,
           enterpriseName: tokenData.enterprise?.name ?? null,
+          pipelineApiKey,
         },
         update: {
           botToken: encrypt(tokenData.access_token),
@@ -127,6 +137,7 @@ export async function GET(request: NextRequest) {
           isEnterprise: tokenData.is_enterprise_install,
           enterpriseId: tokenData.enterprise?.id ?? null,
           enterpriseName: tokenData.enterprise?.name ?? null,
+          ...(existingInstallation?.pipelineApiKey ? {} : { pipelineApiKey }),
         },
       });
     });
