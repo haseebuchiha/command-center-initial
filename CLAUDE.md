@@ -1241,6 +1241,17 @@ The business agents (Support, Sales, Marketing, Customer Success) read and write
 Route handlers: `src/app/api/crm/*/route.ts`
 Validators: `src/validators/crm/*.ts`
 
+### Admin Endpoints
+
+Used by the `onboard` CLI to fetch workspace details during client setup.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/admin/workspaces` | List all Slack workspaces for the authenticated user |
+| `GET /api/admin/workspace/{teamId}` | Get full workspace details (teamId, teamName, pipelineApiKey, encrypted botToken) |
+
+Route handlers: `src/app/api/admin/*/route.ts`
+
 ### Important: No root `app/` directory
 
 **Never create an `app/` directory at the project root.** Next.js 16 will use it as the App Router directory instead of `src/app/`, causing all routes to 404. All app routes must live in `src/app/`.
