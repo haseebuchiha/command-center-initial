@@ -1256,6 +1256,33 @@ Route handlers: `src/app/api/admin/*/route.ts`
 
 **Never create an `app/` directory at the project root.** Next.js 16 will use it as the App Router directory instead of `src/app/`, causing all routes to 404. All app routes must live in `src/app/`.
 
+### Related Projects
+
+The Command Center is one of four components in the LaunchBased platform:
+
+| Project | Repo | Role |
+|---------|------|------|
+| **Command Center** (this repo) | `~/Projects/dan-sasura/launchbased-command-center-v2/` | Dashboard, CRM APIs, Slack OAuth, per-workspace API key generation |
+| **Agent Engine** | `~/Projects/dan-sasura/launchbased-app/` | CrewAI agents, CLI (research, build, assist, onboard), CRM tool calls |
+| **Slack Token Sync** | `~/Projects/dan-sasura/slack-token-sync/` | Decrypts Slack bot tokens from this DB, syncs to OpenClaw config |
+| **OpenClaw** | `~/.openclaw/` (on droplet) | Slack gateway, message routing, Docker sandbox per agent |
+
+**How they connect:**
+- Slack OAuth stores encrypted `botToken` + auto-generated `pipelineApiKey` in `SlackInstallation`
+- Agent Engine reads `pipelineApiKey` via `sandbox.docker.env` → sends as `Authorization: Bearer` header
+- `apiAuth.ts` looks up the key in `SlackInstallation` → resolves to the correct user → all data scoped
+- Slack Token Sync reads `botToken` from this DB → decrypts with `ENCRYPTION_KEY` → writes to OpenClaw config
+- `ENCRYPTION_KEY` must match between this app's `.env` and the slack-token-sync `.env` on the droplet
+
+### Onboarding a New Client (Full Flow)
+
+1. Client registers on Command Center and connects Slack via Integrations page
+2. OAuth callback generates `pipelineApiKey` (stored in `SlackInstallation`)
+3. On the droplet, admin runs: `python -m src.flows.main onboard <name> --team-id <T_ID> --api-key <key>`
+4. Then: `node ~/slack-token-sync/sync.js sync` to load bot token into OpenClaw
+5. Then: `openclaw config reload` to apply changes
+6. Client is live — bot responds in their workspace, CRM data isolated
+
 ---
 
 ## Deployment
