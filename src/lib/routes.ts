@@ -19,6 +19,7 @@ export const routes = {
   website: '/website',
   docs: '/documents',
   analytics: '/analytics',
+  pipeline: '/pipeline',
   daily: '/daily-brief',
   onboarding: '/onboarding',
   settings: '/settings',

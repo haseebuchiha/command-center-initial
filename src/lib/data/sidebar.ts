@@ -11,6 +11,7 @@ export const sidebarItems: SidebarNavItem[] = [
   { id: 'website', label: 'My Website', iconName: 'Globe' },
   { id: 'docs', label: 'Documents', iconName: 'FileText' },
   { id: 'analytics', label: 'Analytics', iconName: 'BarChart2' },
+  { id: 'pipeline', label: 'Pipeline', iconName: 'History' },
   { id: 'daily', label: 'Daily Brief', iconName: 'Briefcase' },
   { id: 'onboarding', label: 'Setup Guide', iconName: 'Rocket' },
   { id: 'settings', label: 'Settings', iconName: 'Settings' },

@@ -234,6 +234,9 @@ model ActivityEvent {
   label         String
   detail        String?
   color         String       @default("#3B82F6")
+  toolName      String?
+  toolInputs    String?
+  toolResult    String?
   pipelineRunId String?
   pipelineRun   PipelineRun? @relation(fields: [pipelineRunId], references: [id], onDelete: SetNull)
   userId        String

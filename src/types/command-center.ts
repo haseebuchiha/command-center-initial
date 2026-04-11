@@ -16,8 +16,9 @@ export type TokenUsageSummary = {
   monthlyLimit: number;
   used: number;
   resetDate: string;
-  byAgent: { name: string; emoji: string; tokens: number; color: string }[];
+  byAgent: { name: string; emoji: string; tokens: number; color: string; costCents?: number }[];
   daily: { day: string; tokens: number }[];
+  totalCostCents?: number;
 };
 
 export type ActivityFeedItem = {

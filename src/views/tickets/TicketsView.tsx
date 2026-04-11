@@ -17,7 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Info, MessageSquare, Clock, User, Bot } from 'lucide-react';
+import { Info, MessageSquare, Clock, User, Sparkles, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { Prisma } from '@/generated/prisma/client';
 import { updateTicketAction } from '@/actions/tickets/updateTicketAction';
 
@@ -123,14 +124,23 @@ function getPriorityBadge(priority: string) {
 function getCreatedByBadge(createdBy: string) {
   if (createdBy === 'agent') {
     return (
-      <Badge variant="outline" className="gap-1 border-violet-500/30 text-violet-500">
-        <Bot className="size-3" />
-        Agent
-      </Badge>
+      <div className="flex flex-col items-end gap-1">
+        <Badge className="gap-1 bg-violet-600 text-white hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-500">
+          <Sparkles className="size-3" />
+          AI Created
+        </Badge>
+        <Link
+          href="/pipeline"
+          className="flex items-center gap-1 text-[11px] text-violet-500 hover:text-violet-400 transition-colors"
+        >
+          View agent activity in Pipeline History
+          <ArrowRight className="size-3" />
+        </Link>
+      </div>
     );
   }
   return (
-    <Badge variant="outline" className="gap-1">
+    <Badge variant="outline" className="gap-1 text-muted-foreground">
       <User className="size-3" />
       Manual
     </Badge>

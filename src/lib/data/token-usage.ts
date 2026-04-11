@@ -24,4 +24,5 @@ export const tokenUsage: TokenUsageSummary = {
     { day: 'Sat', tokens: 31200 },
     { day: 'Sun', tokens: 20180 },
   ],
+  totalCostCents: 0,
 };

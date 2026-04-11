@@ -82,6 +82,16 @@ export const TokenUsageCard = ({ usage }: TokenUsageCardProps) => {
               ~{daysAtPace} days at this pace
             </span>
           </div>
+
+          {/* Cost this month */}
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Cost this month
+            </span>
+            <span className="text-lg font-bold">
+              ${((data.totalCostCents ?? 0) / 100).toFixed(2)}
+            </span>
+          </div>
         </div>
 
         {/* Two columns */}

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const leadUpdateValidator = z.object({
-  stage: z.enum(['new', 'contacted', 'quoted', 'won', 'lost']).optional(),
+  stage: z.enum(['new', 'contacted', 'qualified', 'awaiting_reply', 'call_scheduled', 'quoted', 'proposal_sent', 'won', 'lost', 'reactivation']).optional(),
   estimatedValue: z.number().int().optional(),
   followUpDate: z.string().nullable().optional(),
   followUpNotes: z.string().optional(),

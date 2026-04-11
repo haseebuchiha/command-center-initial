@@ -7,7 +7,7 @@ export const leadCreateValidator = z.object({
   address: z.string().optional(),
   serviceType: z.string().optional(),
   source: z.enum(['website', 'referral', 'phone', 'door_knock', 'social_media', 'other']).optional(),
-  stage: z.enum(['new', 'contacted', 'quoted', 'won', 'lost']).optional(),
+  stage: z.enum(['new', 'contacted', 'qualified', 'awaiting_reply', 'call_scheduled', 'quoted', 'proposal_sent', 'won', 'lost', 'reactivation']).optional(),
   estimatedValue: z.number().int().optional(),
   followUpDate: z.string().optional(),
   followUpNotes: z.string().optional(),

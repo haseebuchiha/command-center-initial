@@ -23,18 +23,23 @@ export function buildTokenUsageSummary(
 
   const agentMap = new Map<
     string,
-    { name: string; emoji: string; tokens: number }
+    { name: string; emoji: string; tokens: number; costCents: number }
   >();
+  let totalCostCents = 0;
   for (const row of rows) {
     const key = row.agent.name;
+    const rowCost = row.costCents ?? 0;
+    totalCostCents += rowCost;
     const existing = agentMap.get(key);
     if (existing) {
       existing.tokens += row.tokens;
+      existing.costCents += rowCost;
     } else {
       agentMap.set(key, {
         name: row.agent.name,
         emoji: row.agent.emoji,
         tokens: row.tokens,
+        costCents: rowCost,
       });
     }
   }
@@ -71,5 +76,6 @@ export function buildTokenUsageSummary(
     resetDate,
     byAgent,
     daily,
+    totalCostCents,
   };
 }

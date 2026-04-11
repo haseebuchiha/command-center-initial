@@ -41,11 +41,25 @@ export const LiveActivityFeed = ({ recentEvents }: LiveActivityFeedProps) => {
         : activityFeedData,
     [recentEvents]
   );
+  const TRUNCATE_LENGTH = 300;
   const [feedItems, setFeedItems] = useState<CompletedFeedItem[]>([]);
   const [streamingIdx, setStreamingIdx] = useState(0);
   const [streamedChars, setStreamedChars] = useState(0);
   const [feedPaused, setFeedPaused] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const toggleExpanded = (id: number) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const currentItem = feedData[streamingIdx % feedData.length];
   const currentText = currentItem.streamText.substring(0, streamedChars);
@@ -130,27 +144,50 @@ export const LiveActivityFeed = ({ recentEvents }: LiveActivityFeedProps) => {
         className="h-[320px] overflow-y-auto bg-gradient-to-b from-background to-card md:h-[380px]"
       >
         {/* Completed items */}
-        {feedItems.map((item) => (
-          <div key={item.id} className="border-b px-4 py-2.5 opacity-60">
-            <div className="flex items-center gap-2">
-              <span className="text-base">{item.emoji}</span>
-              <span
-                className="text-[13px] font-semibold"
-                style={{ color: item.color }}
-              >
-                {item.agent}
-              </span>
-              <span className="text-xs text-muted-foreground">completed</span>
-              <span className="flex-1 text-xs text-muted-foreground">
-                {item.label}
-              </span>
-              <span className="font-mono text-[11px] text-muted-foreground">
-                {item.timestamp}
-              </span>
-              <span className="text-xs text-success">✓</span>
+        {feedItems.map((item) => {
+          const isLong = item.streamText.length > TRUNCATE_LENGTH;
+          const isExpanded = expandedItems.has(item.id);
+          const displayText =
+            isLong && !isExpanded
+              ? item.streamText.substring(0, TRUNCATE_LENGTH) + '...'
+              : item.streamText;
+
+          return (
+            <div key={item.id} className="border-b px-4 py-2.5 opacity-60">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{item.emoji}</span>
+                <span
+                  className="text-[13px] font-semibold"
+                  style={{ color: item.color }}
+                >
+                  {item.agent}
+                </span>
+                <span className="text-xs text-muted-foreground">completed</span>
+                <span className="flex-1 text-xs text-muted-foreground">
+                  {item.label}
+                </span>
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  {item.timestamp}
+                </span>
+                <span className="text-xs text-success">✓</span>
+              </div>
+              {isLong && (
+                <div className="mt-1 pl-7">
+                  <p className="font-mono text-xs leading-relaxed whitespace-pre-wrap break-words text-muted-foreground">
+                    {displayText}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => toggleExpanded(item.id)}
+                    className="mt-0.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {isExpanded ? 'Show less' : 'Show more'}
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Currently streaming */}
         <div

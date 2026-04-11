@@ -9,7 +9,7 @@ export const updateLeadAction = authActionClient
   .inputSchema(
     z.object({
       leadId: z.string(),
-      stage: z.enum(['new', 'contacted', 'quoted', 'won', 'lost']).optional(),
+      stage: z.enum(['new', 'contacted', 'qualified', 'awaiting_reply', 'call_scheduled', 'quoted', 'proposal_sent', 'won', 'lost', 'reactivation']).optional(),
       notes: z.string().optional(),
     })
   )

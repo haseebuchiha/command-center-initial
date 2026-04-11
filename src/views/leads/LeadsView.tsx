@@ -17,13 +17,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Info, Target, Bot, User, Calendar } from 'lucide-react';
+import { Info, Target, Sparkles, User, Calendar, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { Prisma } from '@/generated/prisma/client';
 import { updateLeadAction } from '@/actions/leads/updateLeadAction';
 
 type Lead = Prisma.LeadGetPayload<{ include: { customer: true } }>;
 
-type LeadStage = 'new' | 'contacted' | 'quoted' | 'won' | 'lost';
+type LeadStage = 'new' | 'contacted' | 'qualified' | 'awaiting_reply' | 'call_scheduled' | 'quoted' | 'proposal_sent' | 'won' | 'lost' | 'reactivation';
 
 type StageFilter = 'all' | LeadStage;
 
@@ -34,18 +35,28 @@ type LeadsViewProps = {
 const STAGE_LABELS: Record<LeadStage, string> = {
   new: 'New',
   contacted: 'Contacted',
+  qualified: 'Qualified',
+  awaiting_reply: 'Awaiting Reply',
+  call_scheduled: 'Call Scheduled',
   quoted: 'Quoted',
+  proposal_sent: 'Proposal Sent',
   won: 'Won',
   lost: 'Lost',
+  reactivation: 'Reactivation',
 };
 
 const FILTER_LABELS: Record<StageFilter, string> = {
   all: 'All',
   new: 'New',
   contacted: 'Contacted',
+  qualified: 'Qualified',
+  awaiting_reply: 'Awaiting Reply',
+  call_scheduled: 'Call Scheduled',
   quoted: 'Quoted',
+  proposal_sent: 'Proposal Sent',
   won: 'Won',
   lost: 'Lost',
+  reactivation: 'Reactivation',
 };
 
 function getStageBadge(stage: string) {
@@ -86,10 +97,55 @@ function getStageBadge(stage: string) {
           Won
         </Badge>
       );
+    case 'qualified':
+      return (
+        <Badge
+          variant="outline"
+          className="bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400"
+        >
+          Qualified
+        </Badge>
+      );
+    case 'awaiting_reply':
+      return (
+        <Badge
+          variant="outline"
+          className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+        >
+          Awaiting Reply
+        </Badge>
+      );
+    case 'call_scheduled':
+      return (
+        <Badge
+          variant="outline"
+          className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400"
+        >
+          Call Scheduled
+        </Badge>
+      );
+    case 'proposal_sent':
+      return (
+        <Badge
+          variant="outline"
+          className="bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-400"
+        >
+          Proposal Sent
+        </Badge>
+      );
     case 'lost':
       return (
         <Badge variant="outline" className="bg-secondary text-muted-foreground">
           Lost
+        </Badge>
+      );
+    case 'reactivation':
+      return (
+        <Badge
+          variant="outline"
+          className="bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400"
+        >
+          Reactivation
         </Badge>
       );
     default:
@@ -152,17 +208,23 @@ function getSourceBadge(source: string) {
 function getCreatedByBadge(createdBy: string) {
   if (createdBy === 'agent') {
     return (
-      <Badge
-        variant="outline"
-        className="gap-1 border-violet-500/30 text-violet-500"
-      >
-        <Bot className="size-3" />
-        Agent
-      </Badge>
+      <div className="flex flex-col items-end gap-1">
+        <Badge className="gap-1 bg-violet-600 text-white hover:bg-violet-600 dark:bg-violet-500 dark:hover:bg-violet-500">
+          <Sparkles className="size-3" />
+          AI Created
+        </Badge>
+        <Link
+          href="/pipeline"
+          className="flex items-center gap-1 text-[11px] text-violet-500 hover:text-violet-400 transition-colors"
+        >
+          View agent activity in Pipeline History
+          <ArrowRight className="size-3" />
+        </Link>
+      </div>
     );
   }
   return (
-    <Badge variant="outline" className="gap-1">
+    <Badge variant="outline" className="gap-1 text-muted-foreground">
       <User className="size-3" />
       Manual
     </Badge>
@@ -207,9 +269,14 @@ export const LeadsView = ({ leads }: LeadsViewProps) => {
     all: localLeads.length,
     new: localLeads.filter((l) => l.stage === 'new').length,
     contacted: localLeads.filter((l) => l.stage === 'contacted').length,
+    qualified: localLeads.filter((l) => l.stage === 'qualified').length,
+    awaiting_reply: localLeads.filter((l) => l.stage === 'awaiting_reply').length,
+    call_scheduled: localLeads.filter((l) => l.stage === 'call_scheduled').length,
     quoted: localLeads.filter((l) => l.stage === 'quoted').length,
+    proposal_sent: localLeads.filter((l) => l.stage === 'proposal_sent').length,
     won: localLeads.filter((l) => l.stage === 'won').length,
     lost: localLeads.filter((l) => l.stage === 'lost').length,
+    reactivation: localLeads.filter((l) => l.stage === 'reactivation').length,
   };
 
   const handleStageChange = (leadId: string, newStage: LeadStage) => {
@@ -358,9 +425,14 @@ export const LeadsView = ({ leads }: LeadsViewProps) => {
                     <SelectContent>
                       <SelectItem value="new">New</SelectItem>
                       <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="awaiting_reply">Awaiting Reply</SelectItem>
+                      <SelectItem value="call_scheduled">Call Scheduled</SelectItem>
                       <SelectItem value="quoted">Quoted</SelectItem>
+                      <SelectItem value="proposal_sent">Proposal Sent</SelectItem>
                       <SelectItem value="won">Won</SelectItem>
                       <SelectItem value="lost">Lost</SelectItem>
+                      <SelectItem value="reactivation">Reactivation</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

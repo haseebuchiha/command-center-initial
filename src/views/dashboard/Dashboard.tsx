@@ -13,13 +13,14 @@ import { NextActionCard } from '@/components/app/NextActionCard';
 import { NudgeBanner } from '@/components/app/NudgeBanner';
 import { useCommandCenterStore } from '@/lib/stores/command-center-store';
 import { Agent, ActivityEvent, Prisma } from '@/generated/prisma/client';
-import { TokenUsageSummary } from '@/types/command-center';
+import { TokenUsageSummary, ChartDataPoint } from '@/types/command-center';
 import { StatsGrid } from './StatsGrid';
 import { TokenUsageCard } from './TokenUsageCard';
 import { LiveActivityFeed } from './LiveActivityFeed';
 import { WorkingAgentsCard } from './WorkingAgentsCard';
 import { PendingApprovalsCard } from './PendingApprovalsCard';
 import { WeeklyActivityChart } from './WeeklyActivityChart';
+import { CrmSummaryCard } from './CrmSummaryCard';
 
 type ApprovalWithAgent = Prisma.ApprovalGetPayload<{
   include: { agent: true };
@@ -30,11 +31,20 @@ type DashboardProps = {
     activeAgents: number;
     pendingApprovals: number;
     tasksDoneToday: number;
+    leadsThisWeek?: number;
   };
   tokenUsage?: TokenUsageSummary | null;
   recentActivity?: ActivityEvent[];
   workingAgents?: Agent[];
   pendingApprovals?: ApprovalWithAgent[];
+  weeklyChartData?: ChartDataPoint[];
+  crmSummary?: {
+    openTickets: number;
+    urgentTickets: number;
+    highTickets: number;
+    newLeads: number;
+    activeCampaigns: number;
+  };
 };
 
 export const Dashboard = ({
@@ -43,6 +53,8 @@ export const Dashboard = ({
   recentActivity,
   workingAgents,
   pendingApprovals,
+  weeklyChartData,
+  crmSummary,
 }: DashboardProps) => {
   const router = useRouter();
   const dismissedNudges = useCommandCenterStore((s) => s.dismissedNudges);
@@ -92,6 +104,7 @@ export const Dashboard = ({
       )}
 
       <StatsGrid stats={stats} />
+      <CrmSummaryCard crmSummary={crmSummary} />
       <TokenUsageCard usage={tokenUsage ?? undefined} />
       <LiveActivityFeed recentEvents={recentActivity} />
 
@@ -100,7 +113,7 @@ export const Dashboard = ({
         <PendingApprovalsCard approvals={pendingApprovals} />
       </div>
 
-      <WeeklyActivityChart />
+      <WeeklyActivityChart data={weeklyChartData} />
     </div>
   );
 };

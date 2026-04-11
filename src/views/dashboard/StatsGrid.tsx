@@ -6,6 +6,7 @@ type StatsProps = {
     activeAgents: number;
     pendingApprovals: number;
     tasksDoneToday: number;
+    leadsThisWeek?: number;
   };
 };
 
@@ -31,7 +32,7 @@ const defaultStats = [
   },
   {
     label: 'Leads This Week',
-    value: '31',
+    value: '0',
     icon: '📈',
     colorClass: 'text-accent',
   },
@@ -42,7 +43,8 @@ export const StatsGrid = ({ stats }: StatsProps) => {
     stats &&
     (stats.activeAgents > 0 ||
       stats.pendingApprovals > 0 ||
-      stats.tasksDoneToday > 0);
+      stats.tasksDoneToday > 0 ||
+      (stats.leadsThisWeek ?? 0) > 0);
 
   const displayStats = hasRealData
     ? [
@@ -67,7 +69,7 @@ export const StatsGrid = ({ stats }: StatsProps) => {
         },
         {
           label: 'Leads This Week',
-          value: '31',
+          value: stats.leadsThisWeek?.toString() ?? '0',
           icon: '📈',
           colorClass: 'text-accent',
         },

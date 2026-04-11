@@ -10,5 +10,8 @@ export const activityEventValidator = z.object({
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/)
     .optional(),
+  toolName: z.string().optional(),
+  toolInputs: z.string().optional(),
+  toolResult: z.string().optional(),
   pipelineRunId: z.string().optional(),
 });
