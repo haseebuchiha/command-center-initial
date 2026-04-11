@@ -12,6 +12,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
+    const name = searchParams.get('name');
     const stage = searchParams.get('stage');
     const source = searchParams.get('source');
     const serviceType = searchParams.get('serviceType');
@@ -30,7 +31,9 @@ export async function GET(request: Request) {
       where.serviceType = { contains: serviceType, mode: 'insensitive' };
     }
 
-    if (search) {
+    if (name) {
+      where.name = { equals: name, mode: 'insensitive' };
+    } else if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { phone: { contains: search, mode: 'insensitive' } },
